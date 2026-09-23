@@ -1,0 +1,83 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import SiteMenu from "@/components/SiteMenu.astro";
+import GridBackdrop from "@/components/GridBackdrop.astro";
+import WorksBrowser from "@/components/WorksBrowser.astro";
+import TerminalPrompt from "@/components/TerminalPrompt.astro";
+---
+
+<Layout title="Works | Takao Yoshida">
+  <div class="stage">
+    <GridBackdrop variant="wide" />
+    <SiteMenu current="works" />
+
+    <header class="page-header" id="pageHeader">
+      <h1 class="page-title">Works</h1>
+    </header>
+
+    <WorksBrowser />
+
+    <TerminalPrompt initialPath="~/works/01" showDelay={420} />
+  </div>
+</Layout>
+
+<style>
+  .stage {
+    box-sizing: border-box;
+    position: relative;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    font-family: var(--mono);
+    display: flex;
+    flex-direction: column;
+    padding: clamp(28px, 5vw, 56px) clamp(24px, 6vw, 80px) clamp(72px, 10vw, 100px);
+  }
+
+  .page-header {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+    margin-bottom: clamp(28px, 5vw, 44px);
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+      opacity 0.7s ease,
+      transform 0.7s ease;
+  }
+  .page-header.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .page-title {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(32px, 5vw, 46px);
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page-header {
+      transition: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+</style>
+
+<script>
+  const header = document.getElementById("pageHeader");
+  const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  if (reduced) {
+    header?.classList.add("show");
+  } else {
+    setTimeout(() => header?.classList.add("show"), 100);
+  }
+</script>

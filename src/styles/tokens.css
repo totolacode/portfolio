@@ -1,0 +1,14 @@
+:root {
+  --bg: #0a0d12;
+  --grid-line: rgba(255, 255, 255, 0.05);
+  --ink: #e9ecf2;
+  --ink-dim: rgba(233, 236, 242, 0.6);
+  --muted: #8890a0;
+  --rule: rgba(233, 236, 242, 0.14);
+  --accent-solid: #5fc7ef;
+  --hl: #d8b463;
+  --panel-bg: rgba(255, 255, 255, 0.03);
+
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --display: "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+}

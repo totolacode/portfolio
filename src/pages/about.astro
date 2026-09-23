@@ -1,0 +1,39 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import SiteMenu from "@/components/SiteMenu.astro";
+import BackgroundPhoto from "@/components/BackgroundPhoto.astro";
+import AboutPanel from "@/components/AboutPanel.astro";
+import TerminalPrompt from "@/components/TerminalPrompt.astro";
+---
+
+<Layout title="About | Takao Yoshida">
+  <div class="stage">
+    <SiteMenu current="about" />
+    <BackgroundPhoto mode="static" />
+
+    <AboutPanel />
+
+    <TerminalPrompt initialPath="~/about/message" />
+  </div>
+</Layout>
+
+<style>
+  .stage {
+    box-sizing: border-box;
+    position: relative;
+    height: 100vh;
+    height: 100svh;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    overflow: hidden;
+    font-family: var(--mono);
+  }
+
+  @media (max-width: 860px) {
+    .stage {
+      justify-content: center;
+      padding: 24px;
+    }
+  }
+</style>

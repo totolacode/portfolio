@@ -1,0 +1,351 @@
+---
+import { works } from "@/data/works";
+---
+
+<div class="works-shell" id="worksShell">
+  <nav class="works-list" id="worksList" aria-label="実績一覧">
+    {
+      works.map((work, i) => (
+        <button
+          type="button"
+          class={`work-row ${i === 0 ? "current" : ""}`}
+          data-work={work.id}
+          data-cd-target={work.index}
+        >
+          <span class="row-index">{work.index}</span>
+          <span class="row-name">{work.title}</span>
+        </button>
+      ))
+    }
+  </nav>
+
+  <div class="works-detail" id="worksDetail">
+    {
+      works.map((work, i) => (
+        <div class={`detail-panel ${i === 0 ? "current" : ""}`} data-work-panel={work.id}>
+          <div class="detail-shot">
+            {work.image ? <img src={work.image} alt={`${work.title}のスクリーンショット`} loading="lazy" /> : <span class="detail-shot-label">screenshot</span>}
+          </div>
+          <h2 class="detail-title">{work.title}</h2>
+
+          <div class="detail-section">
+            <span class="detail-label">Tech Stack</span>
+            <div class="stack-tags">
+              {work.tech.map((t) => (
+                <span>{t}</span>
+              ))}
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <span class="detail-label">Comment</span>
+            {
+              work.comment.split("\n\n").map((paragraph) => (
+                <p class="detail-comment">{paragraph}</p>
+              ))
+            }
+          </div>
+
+          {work.url && (
+            <a class="detail-link" href={work.url} target="_blank" rel="noopener noreferrer">
+              サイトを見る
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" aria-hidden="true">
+                <path d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          )}
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .works-shell {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    gap: clamp(20px, 3vw, 32px);
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+      opacity 0.7s ease,
+      transform 0.7s ease;
+  }
+  .works-shell.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .works-list {
+    flex: 0 0 clamp(260px, 26vw, 340px);
+    min-height: 0;
+    overflow-y: auto;
+    border: 1px solid var(--rule);
+    background: var(--panel-bg);
+    scrollbar-width: thin;
+    scrollbar-color: var(--rule) transparent;
+  }
+  .works-list::-webkit-scrollbar {
+    width: 6px;
+  }
+  .works-list::-webkit-scrollbar-thumb {
+    background: var(--rule);
+    border-radius: 3px;
+  }
+
+  .work-row {
+    appearance: none;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--rule);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    text-align: left;
+    cursor: pointer;
+    position: relative;
+    color: var(--muted);
+    transition:
+      color 0.2s ease,
+      background 0.2s ease;
+  }
+  .work-row::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--hl);
+    transform: scaleY(0);
+    transition: transform 0.2s ease;
+  }
+  .work-row:last-child {
+    border-bottom: none;
+  }
+  .row-index {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .row-name {
+    font-family: var(--display);
+    font-size: 14px;
+    color: var(--ink-dim);
+  }
+  .work-row:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+  .work-row:hover .row-name {
+    color: var(--ink);
+  }
+  .work-row.current {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .work-row.current::before {
+    transform: scaleY(1);
+  }
+  .work-row.current .row-name {
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .work-row.current .row-index {
+    color: var(--hl);
+  }
+
+  .works-detail {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    overflow-y: auto;
+    border: 1px solid var(--rule);
+    background: var(--panel-bg);
+    padding: clamp(22px, 3vw, 32px);
+    scrollbar-width: thin;
+    scrollbar-color: var(--rule) transparent;
+  }
+  .works-detail::-webkit-scrollbar {
+    width: 6px;
+  }
+  .works-detail::-webkit-scrollbar-thumb {
+    background: var(--rule);
+    border-radius: 3px;
+  }
+
+  .detail-panel {
+    display: none;
+  }
+  .detail-panel.current {
+    display: block;
+  }
+
+  .detail-shot {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--rule);
+    margin-bottom: clamp(20px, 3vw, 28px);
+    background: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0 2px, transparent 2px 10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .detail-shot img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+  }
+  .detail-shot-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px dashed var(--rule);
+    padding: 6px 14px;
+  }
+
+  .detail-title {
+    margin: 0 0 clamp(16px, 3vw, 20px);
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(20px, 2.6vw, 25px);
+    color: var(--ink);
+  }
+
+  .detail-section {
+    margin-bottom: clamp(20px, 3vw, 26px);
+  }
+  .detail-section:last-child {
+    margin-bottom: 0;
+  }
+  .detail-label {
+    display: block;
+    margin-bottom: 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .stack-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+  .stack-tags span {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--hl);
+  }
+  .stack-tags span::before {
+    content: "#";
+    opacity: 0.6;
+  }
+
+  .detail-comment {
+    margin: 0 0 12px;
+    font-family: var(--display);
+    font-size: 14px;
+    line-height: 1.95;
+    color: var(--ink-dim);
+  }
+  .detail-comment:last-child {
+    margin-bottom: 0;
+  }
+
+  .detail-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: clamp(22px, 3vw, 28px);
+    text-decoration: none;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--rule);
+    transition:
+      color 0.2s ease,
+      border-color 0.2s ease;
+  }
+  .detail-link svg {
+    width: 12px;
+    height: 12px;
+    stroke: currentColor;
+    transition: transform 0.2s ease;
+  }
+  .detail-link:hover,
+  .detail-link:focus-visible {
+    color: var(--hl);
+    border-color: var(--hl);
+  }
+  .detail-link:hover svg,
+  .detail-link:focus-visible svg {
+    transform: translateX(3px);
+  }
+
+  @media (max-width: 780px) {
+    .works-shell {
+      flex-direction: column;
+    }
+    .works-list {
+      flex: 0 0 auto;
+      max-height: 240px;
+    }
+    .works-detail {
+      flex: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .works-shell {
+      transition: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+</style>
+
+<script>
+  const shell = document.getElementById("worksShell");
+  const rows = document.querySelectorAll<HTMLButtonElement>(".work-row");
+  const panels = document.querySelectorAll<HTMLElement>(".detail-panel");
+  const detail = document.getElementById("worksDetail");
+  const promptPath = document.getElementById("promptPath");
+
+  const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  if (reduced) {
+    shell?.classList.add("show");
+  } else {
+    setTimeout(() => shell?.classList.add("show"), 220);
+  }
+
+  rows.forEach((row) => {
+    row.addEventListener("click", () => {
+      if (row.classList.contains("current")) return;
+      rows.forEach((r) => r.classList.remove("current"));
+      row.classList.add("current");
+
+      const target = row.getAttribute("data-work") ?? "";
+      panels.forEach((panel) => {
+        panel.classList.toggle("current", panel.getAttribute("data-work-panel") === target);
+      });
+      const rowIndex = row.querySelector(".row-index")?.textContent;
+      if (promptPath && rowIndex) promptPath.textContent = `~/works/${rowIndex}`;
+      if (detail) detail.scrollTop = 0;
+    });
+  });
+</script>

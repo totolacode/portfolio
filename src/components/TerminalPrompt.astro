@@ -1,0 +1,171 @@
+---
+interface Props {
+  /** e.g. "~", "~/about/message", "~/works/01" */
+  initialPath: string;
+  /** delay (ms) before the prompt fades in, to line up with page-specific intros */
+  showDelay?: number;
+}
+
+const { initialPath, showDelay = 500 } = Astro.props;
+---
+
+<p class="prompt-line" id="promptLine" data-show-delay={showDelay}>
+  <span class="prompt-prefix">yoshida@portfolio:<span id="promptPath">{initialPath}</span>$</span>
+  <input
+    type="text"
+    id="cmdInput"
+    class="cmd-input"
+    autocomplete="off"
+    autocapitalize="off"
+    autocorrect="off"
+    spellcheck="false"
+    aria-label="コマンド入力(例: cd about)"
+  />
+  <span class="cmd-feedback" id="cmdFeedback"></span>
+</p>
+
+<style>
+  .prompt-line {
+    position: absolute;
+    left: clamp(24px, 7vw, 96px);
+    right: clamp(24px, 7vw, 96px);
+    bottom: clamp(18px, 4vw, 28px);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: clamp(11.5px, 1.5vw, 13px);
+    color: var(--muted);
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    cursor: text;
+  }
+  .prompt-line.show {
+    opacity: 1;
+  }
+  .prompt-prefix {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .cmd-input {
+    flex: 0 1 320px;
+    min-width: 6ch;
+    margin-left: 6px;
+    padding: 0;
+    background: none;
+    border: none;
+    outline: none;
+    font: inherit;
+    color: var(--ink);
+    caret-color: var(--accent-solid);
+  }
+  .cmd-feedback {
+    margin-left: 10px;
+    color: #e0836f;
+    opacity: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity 0.2s ease;
+  }
+  .cmd-feedback.show {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .prompt-line {
+      transition: none !important;
+      opacity: 1 !important;
+    }
+  }
+</style>
+
+<script>
+  const routes: Record<string, string> = {
+    top: "/",
+    home: "/",
+    about: "/about",
+    works: "/works",
+    contact: "/contact",
+  };
+
+  const promptLine = document.getElementById("promptLine");
+  const cmdInput = document.getElementById("cmdInput") as HTMLInputElement | null;
+  const cmdFeedback = document.getElementById("cmdFeedback");
+
+  let feedbackTimer: ReturnType<typeof setTimeout> | undefined;
+
+  function showFeedback(text: string): void {
+    if (!cmdFeedback) return;
+    cmdFeedback.textContent = text;
+    cmdFeedback.classList.add("show");
+    clearTimeout(feedbackTimer);
+    feedbackTimer = setTimeout(() => cmdFeedback.classList.remove("show"), 2200);
+  }
+
+  function navigateTo(url: string): void {
+    window.location.href = url;
+  }
+
+  function handleCommand(raw: string): void {
+    const parts = raw.trim().split(/\s+/);
+    const cmd = parts[0]?.toLowerCase() ?? "";
+
+    if (cmd === "cd") {
+      const rawArg = parts[1] ?? "";
+      const arg = rawArg.toLowerCase().replace(/^\.\//, "").replace(/\/$/, "");
+
+      if (!arg || arg === "~" || arg === "/" || arg === "top" || arg === "home" || arg === "..") {
+        navigateTo("/");
+        return;
+      }
+
+      // Page-specific sub-commands (About's tabs, Works' rows, ...) are
+      // exposed as elements carrying data-cd-target, so this component
+      // doesn't need to know anything about the page it's rendered on.
+      const target = document.querySelector<HTMLElement>(`[data-cd-target="${arg}"]`);
+      if (target) {
+        target.click();
+        return;
+      }
+
+      if (routes[arg]) {
+        navigateTo(routes[arg]);
+        return;
+      }
+
+      showFeedback(`cd: no such file or directory: ${rawArg}`);
+      return;
+    }
+
+    if (cmd === "ls") {
+      showFeedback("top  about  works  contact");
+      return;
+    }
+    if (cmd === "clear") {
+      cmdFeedback?.classList.remove("show");
+      return;
+    }
+    showFeedback(`command not found: ${cmd}`);
+  }
+
+  promptLine?.addEventListener("click", (e) => {
+    if (e.target !== cmdInput) cmdInput?.focus();
+  });
+  cmdInput?.addEventListener("keydown", (e: KeyboardEvent) => {
+    if (e.key !== "Enter") return;
+    const raw = cmdInput.value;
+    if (!raw.trim()) return;
+    handleCommand(raw);
+    cmdInput.value = "";
+  });
+
+  // fade in, matching the rest of the page's intro timing
+  const showDelay = Number(promptLine?.dataset.showDelay ?? 500);
+  const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  if (reduced) {
+    promptLine?.classList.add("show");
+  } else {
+    setTimeout(() => promptLine?.classList.add("show"), showDelay);
+  }
+</script>

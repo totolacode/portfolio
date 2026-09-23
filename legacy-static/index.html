@@ -1,0 +1,697 @@
+<meta charset="utf-8">
+<title>Title Screen Hero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0d12;
+    --grid-line: rgba(255,255,255,0.05);
+    --ink:#e9ecf2;
+    --ink-dim: rgba(233,236,242,0.42);
+    --muted:#7b8296;
+    --rule: rgba(233,236,242,0.22);
+    --accent-solid:#5fc7ef;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --display: 'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+  }
+
+  html, body{ height:100%; overflow:hidden; }
+  body{ margin:0; background:var(--bg); color:var(--ink); }
+
+  .stage{
+    box-sizing:border-box;
+    position:relative;
+    height:100vh;
+    height:100svh;
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    padding: clamp(28px,6vw,64px) clamp(24px,7vw,96px);
+    overflow:hidden;
+    font-family: var(--mono);
+  }
+
+  /* Generative "slideshow" behind the right half only. Left half stays pure
+     black; the boundary is torn up with an SVG turbulence mask instead of a
+     clean gradient edge. */
+  .bg-photo{
+    position:absolute; inset:0;
+    pointer-events:none;
+    -webkit-mask-image: url("noise-mask.svg");
+    mask-image: url("noise-mask.svg");
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+  .bg-photo-img{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    object-fit:cover;
+    opacity:0;
+    transform: scale(1.15);
+    transition: opacity 1.4s ease;
+    filter: saturate(0.55) brightness(0.6) contrast(1.05);
+  }
+  .bg-photo-img.active{ opacity:1; }
+  .bg-photo-img.pan-down{ animation: panDown 10s ease-in-out forwards; }
+  .bg-photo-img.pan-up{ animation: panUp 10s ease-in-out forwards; }
+  .bg-photo-img.pan-right{ animation: panRight 10s ease-in-out forwards; }
+  .bg-photo-img.pan-left{ animation: panLeft 10s ease-in-out forwards; }
+  @keyframes panDown{ from{ transform: scale(1.15) translateY(-3%); } to{ transform: scale(1.15) translateY(3%); } }
+  @keyframes panUp{ from{ transform: scale(1.15) translateY(3%); } to{ transform: scale(1.15) translateY(-3%); } }
+  @keyframes panRight{ from{ transform: scale(1.15) translateX(-3%); } to{ transform: scale(1.15) translateX(3%); } }
+  @keyframes panLeft{ from{ transform: scale(1.15) translateX(3%); } to{ transform: scale(1.15) translateX(-3%); } }
+
+  @media (max-width: 860px){
+    .bg-photo{ display:none; }
+  }
+
+  .grid-bg{
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 42px 42px;
+    -webkit-mask-image: radial-gradient(ellipse 55% 70% at 20% 50%, #000 0%, #000 22%, transparent 65%);
+    mask-image: radial-gradient(ellipse 55% 70% at 20% 50%, #000 0%, #000 22%, transparent 65%);
+    pointer-events:none;
+  }
+
+  .title-block{
+    position:relative;
+    width: min(90vw, 620px);
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap: clamp(20px,3.4vw,30px);
+  }
+
+  .rule{
+    width:100%;
+    height:1px;
+    background-image: repeating-linear-gradient(90deg, var(--rule) 0 6px, transparent 6px 13px);
+  }
+
+  .identity{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap: 0;
+  }
+
+  .hero-figure{
+    position:relative;
+    display:block;
+    width:100%;
+    cursor: crosshair;
+    line-height:0;
+  }
+
+  .headline-svg{
+    display:block;
+    width:100%;
+    height:auto;
+    overflow:visible;
+  }
+
+  .headline-svg text{
+    font-family: var(--display);
+    font-weight:700;
+    font-size: 220px;
+  }
+
+  .txt-base{
+    fill:none;
+    stroke: var(--ink-dim);
+    stroke-width: 1.1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .txt-draw{
+    fill:none;
+    stroke: var(--ink);
+    stroke-width: 1.3;
+    vector-effect: non-scaling-stroke;
+    stroke-dasharray: 3000;
+    stroke-dashoffset: 3000;
+    transition: stroke-dashoffset 1.9s cubic-bezier(.5,0,.3,1);
+  }
+  .txt-fill{
+    fill: none;
+    stroke: url(#accentGrad);
+    stroke-width: 1.3;
+    vector-effect: non-scaling-stroke;
+    opacity:0;
+    transition: opacity .3s ease;
+  }
+  .hero-figure.hover .txt-fill{ opacity:1; }
+
+  .role-label{
+    margin:0;
+    margin-top: -34px;
+    font-family: var(--display);
+    font-weight:500;
+    font-size: clamp(13px, 1.9vw, 16px);
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    opacity:0;
+    transform: translateY(6px);
+    transition: opacity .6s ease, transform .6s ease;
+  }
+  .role-label.show{ opacity:1; transform:translateY(0); }
+
+  .menu{
+    display:flex;
+    flex-direction:column;
+    gap: clamp(4px,1vw,8px);
+    width:100%;
+    opacity:0;
+    transform: translateY(8px);
+    transition: opacity .6s ease, transform .6s ease;
+  }
+  .menu.show{ opacity:1; transform:translateY(0); }
+
+  .menu-item{
+    position:relative;
+    isolation:isolate;
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    text-decoration:none;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: clamp(15px, 2vw, 18px);
+    letter-spacing: 0.03em;
+    padding: 6px 26px 6px 4px;
+    margin-left: 10px;
+    width:fit-content;
+    transition: color .2s ease;
+  }
+  .menu-item::before{
+    content:"";
+    position:absolute;
+    top:0;
+    bottom:0;
+    left:-10px;
+    right:-14px;
+    background: linear-gradient(90deg, rgba(233,236,242,0.16), rgba(233,236,242,0.03) 85%);
+    -webkit-mask-image: url("band-mask.svg");
+    mask-image: url("band-mask.svg");
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    opacity:0;
+    transform: scaleX(0.7);
+    transform-origin: left center;
+    transition: opacity .2s ease, transform .25s ease;
+    z-index:-1;
+  }
+  .menu-item:hover,
+  .menu-item:focus-visible,
+  .menu-item.current{
+    color: var(--ink);
+    outline:none;
+  }
+  .menu-item:hover::before,
+  .menu-item:focus-visible::before,
+  .menu-item.current::before{
+    opacity:1;
+    transform: scaleX(1);
+  }
+  .menu-item:hover span,
+  .menu-item:focus-visible span{
+    animation: textFlicker .8s linear;
+  }
+  @keyframes textFlicker{
+    0%{ opacity:1; }
+    8%{ opacity:0.3; }
+    12%{ opacity:1; }
+    20%{ opacity:0.4; }
+    24%{ opacity:1; }
+    55%{ opacity:1; }
+    60%{ opacity:0.5; }
+    64%{ opacity:1; }
+    100%{ opacity:1; }
+  }
+
+  .prompt-line{
+    position:absolute;
+    left: clamp(24px,7vw,96px);
+    right: clamp(24px,7vw,96px);
+    bottom: clamp(18px,4vw,28px);
+    margin:0;
+    display:flex;
+    align-items:center;
+    font-family: var(--mono);
+    font-size: clamp(11.5px, 1.5vw, 13px);
+    color: var(--muted);
+    opacity:0;
+    transition: opacity .6s ease;
+    cursor:text;
+  }
+  .prompt-line.show{ opacity:1; }
+  .prompt-prefix{ flex-shrink:0; white-space:nowrap; }
+  .cmd-input{
+    flex:0 1 320px;
+    min-width: 6ch;
+    margin-left:6px;
+    padding:0;
+    background:none;
+    border:none;
+    outline:none;
+    font: inherit;
+    color: var(--ink);
+    caret-color: var(--accent-solid);
+  }
+  .cmd-feedback{
+    margin-left:10px;
+    color:#e0836f;
+    opacity:0;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    transition: opacity .2s ease;
+  }
+  .cmd-feedback.show{ opacity:1; }
+
+  @media (prefers-reduced-motion: reduce){
+    .txt-draw, .txt-fill, .role-label, .menu, .prompt-line, .bg-photo-img{ transition: none !important; }
+    .bg-photo-img{ animation: none !important; transform: none !important; }
+    .menu-item:hover span, .menu-item:focus-visible span{ animation: none !important; }
+  }
+
+  /* ---- site menu (hamburger, top-right, shared across every page) ---- */
+  .menu-toggle{
+    position:fixed;
+    top: clamp(20px,4vw,32px);
+    right: clamp(20px,4vw,32px);
+    z-index:60;
+    width:40px; height:40px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    background:none;
+    border:none;
+    padding:0;
+    cursor:pointer;
+    appearance:none;
+  }
+  .menu-toggle-bar{
+    width:22px; height:1.5px;
+    background: var(--ink);
+    transition: transform .3s ease, opacity .3s ease, background .2s ease;
+  }
+  .menu-toggle:hover .menu-toggle-bar{ background: var(--accent-solid); }
+  .menu-toggle.open .menu-toggle-bar:nth-child(1){ transform: translateY(7.5px) rotate(45deg); }
+  .menu-toggle.open .menu-toggle-bar:nth-child(2){ opacity:0; }
+  .menu-toggle.open .menu-toggle-bar:nth-child(3){ transform: translateY(-7.5px) rotate(-45deg); }
+
+  .site-menu{
+    position:fixed; inset:0;
+    z-index:55;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: rgba(6,8,11,0.88);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    opacity:0;
+    visibility:hidden;
+    transition: opacity .3s ease, visibility 0s linear .3s;
+  }
+  .site-menu.open{
+    opacity:1;
+    visibility:visible;
+    transition: opacity .3s ease, visibility 0s linear;
+  }
+
+  .site-menu-list{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap: clamp(4px,1vw,8px);
+  }
+
+  .site-menu-item{
+    position:relative;
+    isolation:isolate;
+    display:flex;
+    align-items:center;
+    text-decoration:none;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: clamp(24px, 4.4vw, 36px);
+    letter-spacing: 0.03em;
+    padding: 10px 34px 10px 6px;
+    transition: color .2s ease;
+  }
+  .site-menu-item::before{
+    content:"";
+    position:absolute;
+    top:0; bottom:0; left:-10px; right:-14px;
+    background: linear-gradient(90deg, rgba(233,236,242,0.16), rgba(233,236,242,0.03) 85%);
+    -webkit-mask-image: url("band-mask.svg");
+    mask-image: url("band-mask.svg");
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    opacity:0;
+    transform: scaleX(0.7);
+    transform-origin: left center;
+    transition: opacity .2s ease, transform .25s ease;
+    z-index:-1;
+  }
+  .site-menu-item:hover,
+  .site-menu-item:focus-visible,
+  .site-menu-item.current{ color: var(--ink); outline:none; }
+  .site-menu-item:hover::before,
+  .site-menu-item:focus-visible::before,
+  .site-menu-item.current::before{ opacity:1; transform: scaleX(1); }
+
+  @media (prefers-reduced-motion: reduce){
+    .menu-toggle-bar, .site-menu{ transition:none !important; }
+  }
+</style>
+
+<div class="stage" id="stage">
+  <button type="button" class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="siteMenu" aria-label="メニュー">
+    <span class="menu-toggle-bar"></span>
+    <span class="menu-toggle-bar"></span>
+    <span class="menu-toggle-bar"></span>
+  </button>
+
+  <div class="site-menu" id="siteMenu" aria-hidden="true">
+    <nav class="site-menu-list" aria-label="サイトメニュー">
+      <a class="site-menu-item current" href="index.html" aria-current="page"><span>Top</span></a>
+      <a class="site-menu-item" href="about.html"><span>About</span></a>
+      <a class="site-menu-item" href="works.html"><span>Works</span></a>
+      <a class="site-menu-item" href="contact.html"><span>Contact</span></a>
+    </nav>
+  </div>
+
+  <div class="bg-photo" id="bgPhoto" aria-hidden="true">
+    <img class="bg-photo-img" id="bgImgA" alt="">
+    <img class="bg-photo-img" id="bgImgB" alt="">
+  </div>
+  <div class="grid-bg" aria-hidden="true"></div>
+
+  <div class="title-block">
+    <div class="identity">
+      <div class="hero-figure" id="heroFigure">
+        <h1 style="margin:0; line-height:0;">
+          <svg class="headline-svg" id="heroSvg" viewBox="0 0 1000 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Takao Yoshida">
+            <defs>
+              <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#fcd34d"/>
+                <stop offset="25%" stop-color="#fb7185"/>
+                <stop offset="50%" stop-color="#38bdf8"/>
+                <stop offset="75%" stop-color="#22d3ee"/>
+                <stop offset="100%" stop-color="#a78bfa"/>
+              </linearGradient>
+              <radialGradient id="revealGrad" gradientUnits="userSpaceOnUse" cx="200" cy="150" r="140">
+                <stop offset="0%" stop-color="#fff"/>
+                <stop offset="62%" stop-color="#fff"/>
+                <stop offset="100%" stop-color="#000"/>
+              </radialGradient>
+              <mask id="revealMask">
+                <rect id="maskRect" x="0" y="0" width="1000" height="300" fill="url(#revealGrad)"/>
+              </mask>
+            </defs>
+            <text id="txtBase" class="txt-base" x="0" y="150" text-anchor="start" dominant-baseline="middle">Takao Yoshida</text>
+            <text id="txtDraw" class="txt-draw" x="0" y="150" text-anchor="start" dominant-baseline="middle">Takao Yoshida</text>
+            <text id="txtFill" class="txt-fill" x="0" y="150" text-anchor="start" dominant-baseline="middle" mask="url(#revealMask)">Takao Yoshida</text>
+          </svg>
+        </h1>
+      </div>
+
+      <p class="role-label" id="roleLabel">Frontend Engineer</p>
+    </div>
+
+    <nav class="menu" id="menu" aria-label="メインメニュー">
+      <a class="menu-item current" href="about.html" aria-current="page"><span>About</span></a>
+      <a class="menu-item" href="#works"><span>Works</span></a>
+      <a class="menu-item" href="#contact"><span>Contact</span></a>
+    </nav>
+  </div>
+
+  <p class="prompt-line" id="promptLine">
+    <span class="prompt-prefix">yoshida@portfolio:~$</span>
+    <input type="text" id="cmdInput" class="cmd-input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="コマンド入力(例: cd about)">
+    <span class="cmd-feedback" id="cmdFeedback"></span>
+  </p>
+</div>
+
+<noscript>
+<style>
+  .txt-draw{ stroke-dashoffset:0 !important; }
+  .role-label, .menu, .prompt-line{ opacity:1 !important; transform:none !important; }
+</style>
+</noscript>
+
+<script>
+(function(){
+  var stage = document.getElementById('stage');
+  var figure = document.getElementById('heroFigure');
+  var svg = document.getElementById('heroSvg');
+  var txtBase = document.getElementById('txtBase');
+  var txtDraw = document.getElementById('txtDraw');
+  var txtFill = document.getElementById('txtFill');
+  var revealGrad = document.getElementById('revealGrad');
+  var maskRect = document.getElementById('maskRect');
+  var roleLabel = document.getElementById('roleLabel');
+  var menu = document.getElementById('menu');
+  var promptLine = document.getElementById('promptLine');
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---- nav: hovering an item hands the "current" selection to it, and it stays there ----
+  var menuItems = menu.querySelectorAll('.menu-item');
+  menuItems.forEach(function(item){
+    item.addEventListener('mouseenter', function(){
+      menuItems.forEach(function(i){
+        i.classList.remove('current');
+        i.removeAttribute('aria-current');
+      });
+      item.classList.add('current');
+      item.setAttribute('aria-current', 'page');
+    });
+  });
+
+  // ---- headline outline-draw + hover reveal (unchanged mechanism) ----
+  function layoutSvg(){
+    var bbox;
+    try { bbox = txtBase.getBBox(); } catch (e) { bbox = { x:0, y:0, width:900, height:220 }; }
+    // padX is just enough breathing room for stroke overflow at the glyph's
+    // left edge, kept small so the text lines up flush with .role-label and
+    // .menu-item below it. padY/padR give the vertical + right-side buffer
+    // the draw stroke and hover glow actually need.
+    var padX = Math.max(bbox.height * 0.03, 4);
+    var padY = Math.max(bbox.height * 0.22, 24);
+    var w = bbox.width + padX + padY;
+    var h = bbox.height + padY * 2;
+    var cy = h / 2;
+    // txtBase was measured with x=0, so bbox.x is the glyph's left-side
+    // bearing offset from that origin. Correct for it so the visible ink
+    // (not the nominal x attribute) lands exactly at padX.
+    var xAttr = padX - bbox.x;
+
+    svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    [txtBase, txtDraw, txtFill].forEach(function(t){
+      t.setAttribute('x', xAttr);
+      t.setAttribute('y', cy);
+    });
+    maskRect.setAttribute('width', w);
+    maskRect.setAttribute('height', h);
+    revealGrad.setAttribute('cx', padX + bbox.width * 0.3);
+    revealGrad.setAttribute('cy', cy);
+    revealGrad.setAttribute('r', Math.max(bbox.width, bbox.height) * 0.18);
+
+    var dash = Math.ceil((bbox.width + bbox.height) * 3);
+    txtDraw.style.strokeDasharray = dash;
+    if (!figure.classList.contains('played')) txtDraw.style.strokeDashoffset = dash;
+  }
+
+  function svgPoint(clientX, clientY){
+    var ctm = svg.getScreenCTM();
+    if (!ctm) return { x: 0, y: 0 };
+    var pt = svg.createSVGPoint();
+    pt.x = clientX; pt.y = clientY;
+    var loc = pt.matrixTransform(ctm.inverse());
+    return { x: loc.x, y: loc.y };
+  }
+
+  figure.addEventListener('pointermove', function(e){
+    var p = svgPoint(e.clientX, e.clientY);
+    revealGrad.setAttribute('cx', p.x);
+    revealGrad.setAttribute('cy', p.y);
+  });
+  figure.addEventListener('pointerenter', function(){ figure.classList.add('hover'); });
+  figure.addEventListener('pointerleave', function(){ figure.classList.remove('hover'); });
+
+  var introStarted = false;
+  function startIntro(){
+    if (introStarted) return;
+    introStarted = true;
+    layoutSvg();
+    if (reduced){
+      figure.classList.add('played');
+      txtDraw.style.strokeDashoffset = '0';
+      roleLabel.classList.add('show');
+      menu.classList.add('show');
+      promptLine.classList.add('show');
+      return;
+    }
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        figure.classList.add('played');
+        txtDraw.style.strokeDashoffset = '0';
+      });
+    });
+    setTimeout(function(){ roleLabel.classList.add('show'); }, 1500);
+    setTimeout(function(){ menu.classList.add('show'); }, 1900);
+    setTimeout(function(){ promptLine.classList.add('show'); }, 2300);
+  }
+
+  // ---- random landscape photo "slideshow" (right side only), via Picsum Photos ----
+  var bgPhoto = document.getElementById('bgPhoto');
+  var bgImgs = [document.getElementById('bgImgA'), document.getElementById('bgImgB')];
+  var activeImg = 0;
+  var panDirections = ['pan-down', 'pan-right', 'pan-up', 'pan-left'];
+  var panIndex = 0;
+
+  function applyPan(imgEl){
+    imgEl.classList.remove('pan-down', 'pan-up', 'pan-left', 'pan-right');
+    if (reduced) return;
+    void imgEl.offsetWidth; // restart the animation on this reused element
+    imgEl.classList.add(panDirections[panIndex % panDirections.length]);
+    panIndex++;
+  }
+
+  function randomPhotoUrl(){
+    var w = Math.max(1, Math.round((bgPhoto.clientWidth || 900) * (window.devicePixelRatio || 1)));
+    var h = Math.max(1, Math.round((bgPhoto.clientHeight || 900) * (window.devicePixelRatio || 1)));
+    // the `random` query param forces Picsum to serve a fresh random photo
+    // instead of a cached one for this same width/height.
+    return 'https://picsum.photos/' + w + '/' + h + '?random=' + Date.now() + Math.random();
+  }
+
+  function showNextPhoto(retriesLeft){
+    if (retriesLeft === undefined) retriesLeft = 3;
+    var nextIdx = 1 - activeImg;
+    var img = new Image();
+    img.onload = function(){
+      bgImgs[nextIdx].src = img.src;
+      applyPan(bgImgs[nextIdx]);
+      bgImgs[nextIdx].classList.add('active');
+      bgImgs[activeImg].classList.remove('active');
+      activeImg = nextIdx;
+    };
+    img.onerror = function(){
+      if (retriesLeft > 0) setTimeout(function(){ showNextPhoto(retriesLeft - 1); }, 1200);
+    };
+    img.src = randomPhotoUrl();
+  }
+
+  showNextPhoto();
+  if (!reduced){
+    setInterval(function(){ showNextPhoto(); }, 9000);
+  }
+
+  if (document.fonts && document.fonts.load){
+    Promise.all([
+      document.fonts.load('700 100px "Zen Kaku Gothic New"'),
+      document.fonts.ready
+    ]).then(startIntro).catch(startIntro);
+    setTimeout(startIntro, 1200);
+  } else {
+    startIntro();
+  }
+})();
+</script>
+
+<script>
+(function(){
+  var toggle = document.getElementById('menuToggle');
+  var menu = document.getElementById('siteMenu');
+
+  function closeMenu(){
+    toggle.classList.remove('open');
+    toggle.setAttribute('aria-expanded', 'false');
+    menu.classList.remove('open');
+    menu.setAttribute('aria-hidden', 'true');
+  }
+  function openMenu(){
+    toggle.classList.add('open');
+    toggle.setAttribute('aria-expanded', 'true');
+    menu.classList.add('open');
+    menu.setAttribute('aria-hidden', 'false');
+  }
+
+  toggle.addEventListener('click', function(){
+    if (menu.classList.contains('open')) closeMenu(); else openMenu();
+  });
+  menu.addEventListener('click', function(e){
+    if (e.target === menu) closeMenu();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeMenu();
+  });
+})();
+</script>
+
+<script>
+(function(){
+  var promptLine = document.getElementById('promptLine');
+  var cmdInput = document.getElementById('cmdInput');
+  var cmdFeedback = document.getElementById('cmdFeedback');
+  var routes = { top:'index.html', home:'index.html', about:'about.html', works:'works.html', contact:'contact.html' };
+  var feedbackTimer;
+
+  function showFeedback(text){
+    cmdFeedback.textContent = text;
+    cmdFeedback.classList.add('show');
+    clearTimeout(feedbackTimer);
+    feedbackTimer = setTimeout(function(){ cmdFeedback.classList.remove('show'); }, 2200);
+  }
+
+  function navigateTo(url){
+    showFeedback('');
+    window.location.href = url;
+  }
+
+  function handleCommand(raw){
+    var parts = raw.trim().split(/\s+/);
+    var cmd = parts[0].toLowerCase();
+
+    if (cmd === 'cd'){
+      var arg = (parts[1] || '').toLowerCase().replace(/^\.\//, '').replace(/\/$/, '');
+      if (!arg || arg === '~' || arg === '/' || arg === '..' || arg === 'top' || arg === 'home'){
+        showFeedback('already at the top');
+        return;
+      }
+      if (routes[arg]){ navigateTo(routes[arg]); return; }
+      showFeedback('cd: no such file or directory: ' + parts[1]);
+      return;
+    }
+    if (cmd === 'ls'){ showFeedback('about  works  contact'); return; }
+    if (cmd === 'clear'){ cmdFeedback.classList.remove('show'); return; }
+    showFeedback('command not found: ' + cmd);
+  }
+
+  promptLine.addEventListener('click', function(e){
+    if (e.target !== cmdInput) cmdInput.focus();
+  });
+  cmdInput.addEventListener('keydown', function(e){
+    if (e.key !== 'Enter') return;
+    var raw = cmdInput.value;
+    if (!raw.trim()) return;
+    handleCommand(raw);
+    cmdInput.value = '';
+  });
+})();
+</script>

@@ -1,0 +1,389 @@
+---
+import { origin, summary, summaryHighlight, career } from "@/data/career";
+---
+
+<div class="file-panel" id="panel">
+  <div class="file-head">
+    <svg
+      class="file-icon current"
+      data-icon="about"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.3"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="8" r="4"></circle>
+      <path d="M4 20.5c0-4.14 3.58-7.5 8-7.5s8 3.36 8 7.5"></path>
+    </svg>
+    <svg class="file-icon" data-icon="career" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true">
+      <rect x="3" y="8" width="18" height="12" rx="1.5"></rect>
+      <path d="M8.5 8V6.5A2.5 2.5 0 0111 4h2a2.5 2.5 0 012.5 2.5V8"></path>
+      <path d="M3 13.5h18"></path>
+    </svg>
+
+    <h1 class="file-title">About</h1>
+    <div class="file-rule"></div>
+
+    <div class="file-tabs" role="tablist">
+      <button type="button" class="file-tab current" data-tab="about" data-cd-target="message" role="tab" aria-selected="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" aria-hidden="true">
+          <circle cx="12" cy="8" r="3.4"></circle>
+          <path d="M5.5 20c0-3.5 2.9-6 6.5-6s6.5 2.5 6.5 6"></path>
+        </svg>
+        メッセージ
+      </button>
+      <button type="button" class="file-tab" data-tab="career" data-cd-target="career" role="tab" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" aria-hidden="true">
+          <rect x="3" y="8" width="18" height="12" rx="1.5"></rect>
+          <path d="M8.5 8V6.5A2.5 2.5 0 0111 4h2a2.5 2.5 0 012.5 2.5V8"></path>
+          <path d="M3 13.5h18"></path>
+        </svg>
+        経歴
+      </button>
+    </div>
+  </div>
+
+  <div class="file-scroll">
+    <div class="file-panels">
+      <div class="file-body current" data-panel="about">
+        <p class="salutation">技術は広く、関わりは深く。</p>
+
+        <p>
+          特定の技術に絞らず、幅広く触れてきました。深く実務で扱ってきたものもあれば、興味本位で少し触れた程度のものもありますが、
+          <span class="hl">新しい技術に触れること自体が好き</span>で、休みの日でも気づけば新しいツールを触っていることがあります。
+        </p>
+
+        <p>
+          一方で、関わる相手や案件には、数より深さを大事にしています。一つひとつの仕様やコードを丁寧に検討し、
+          <span class="hl">細部まで妥協せず向き合いたい</span>と考えています。
+        </p>
+
+        <p class="closing">一緒に仕事をしてみたい、と思っていただけたら幸いです。お気軽にご連絡ください。</p>
+      </div>
+
+      <div class="file-body" data-panel="career">
+        <p class="origin-line">{origin}</p>
+
+        <p class="salutation">職務概要</p>
+        <p>
+          {summary.split(summaryHighlight)[0]}<span class="hl">{summaryHighlight}</span>{summary.split(summaryHighlight)[1]}
+        </p>
+
+        <div class="timeline">
+          {
+            career.map((entry) => (
+              <div class="timeline-item">
+                <p class="timeline-period">{entry.period}</p>
+                <p class="timeline-company">{entry.company}</p>
+                {entry.description && <p class="timeline-desc">{entry.description}</p>}
+                {entry.sub?.map((sub) => (
+                  <div class="timeline-sub">
+                    <p class="timeline-period">{sub.period}</p>
+                    <p class="timeline-desc">
+                      {sub.highlight ? (
+                        <>
+                          {sub.description.split(sub.highlight)[0]}
+                          <span class="hl">{sub.highlight}</span>
+                          {sub.description.split(sub.highlight)[1]}
+                        </>
+                      ) : (
+                        sub.description
+                      )}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .file-panel {
+    box-sizing: border-box;
+    position: relative;
+    width: min(92vw, 640px);
+    height: min(86vh, 780px);
+    height: min(86svh, 780px);
+    margin-right: clamp(20px, 5vw, 64px);
+    display: flex;
+    flex-direction: column;
+    background: var(--panel-bg);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 3px;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+    opacity: 0;
+    transform: translateY(10px) scale(0.99);
+    transition:
+      opacity 0.7s ease,
+      transform 0.7s ease;
+  }
+  .file-panel.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .file-head {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(22px, 4vw, 34px) clamp(24px, 5vw, 40px) 0;
+  }
+
+  .file-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: clamp(10px, 1.8vw, 16px) clamp(24px, 5vw, 40px) clamp(22px, 4vw, 34px);
+    scrollbar-width: thin;
+    scrollbar-color: var(--rule) transparent;
+  }
+  .file-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+  .file-scroll::-webkit-scrollbar-thumb {
+    background: var(--rule);
+    border-radius: 3px;
+  }
+
+  .file-icon {
+    display: none;
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    margin: 0 auto clamp(4px, 0.8vw, 6px);
+    color: var(--ink-dim);
+  }
+  .file-icon.current {
+    display: block;
+  }
+
+  .file-title {
+    flex-shrink: 0;
+    margin: 0 0 clamp(16px, 3vw, 22px);
+    text-align: center;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(22px, 3vw, 27px);
+    letter-spacing: 0.03em;
+    color: var(--ink);
+  }
+
+  .file-rule {
+    flex-shrink: 0;
+    width: 100%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.12);
+    margin-bottom: clamp(16px, 3vw, 22px);
+  }
+
+  .file-tabs {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    gap: clamp(20px, 4vw, 32px);
+    margin-bottom: clamp(20px, 4vw, 26px);
+  }
+  .file-tab {
+    appearance: none;
+    background: none;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 0 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    position: relative;
+  }
+  .file-tab svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    flex-shrink: 0;
+  }
+  .file-tab::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1.5px;
+    background: var(--hl);
+    transform: scaleX(0);
+    transition: transform 0.25s ease;
+  }
+  .file-tab:hover {
+    color: var(--ink-dim);
+  }
+  .file-tab.current {
+    color: var(--ink);
+  }
+  .file-tab.current::after {
+    transform: scaleX(1);
+  }
+
+  .file-panels {
+    position: relative;
+  }
+  .file-body {
+    display: none;
+    font-family: var(--display);
+    font-size: 14px;
+    line-height: 1.95;
+    color: var(--ink-dim);
+  }
+  .file-body.current {
+    display: block;
+  }
+  .file-body .salutation {
+    margin: 0 0 clamp(14px, 2.4vw, 18px);
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .file-body p {
+    margin: 0 0 clamp(14px, 2.4vw, 18px);
+  }
+  .file-body p:last-child {
+    margin-bottom: 0;
+  }
+  .file-body :global(.hl) {
+    color: var(--hl);
+  }
+  .file-body .closing {
+    color: var(--hl);
+  }
+
+  .origin-line {
+    margin: 0 0 clamp(16px, 3vw, 20px);
+    padding-bottom: clamp(14px, 2.6vw, 18px);
+    border-bottom: 1px dashed var(--rule);
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+  }
+
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(18px, 3.4vw, 24px);
+  }
+  .timeline-item {
+    position: relative;
+    padding-left: 18px;
+    border-left: 1px solid var(--rule);
+  }
+  .timeline-item::before {
+    content: "";
+    position: absolute;
+    left: -4px;
+    top: 4px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--hl);
+  }
+  .timeline-period {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--hl);
+    margin-bottom: 4px;
+  }
+  .timeline-company {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 14.5px;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .timeline-desc {
+    font-family: var(--display);
+    font-size: 13px;
+    line-height: 1.85;
+    color: var(--ink-dim);
+  }
+  .timeline-sub {
+    margin-top: 10px;
+    padding-left: 14px;
+    border-left: 1px dashed var(--rule);
+  }
+  .timeline-sub + .timeline-sub {
+    margin-top: 12px;
+  }
+  .timeline-sub .timeline-period {
+    margin-bottom: 2px;
+  }
+  .timeline-sub .timeline-desc {
+    font-size: 12.5px;
+  }
+
+  @media (max-width: 860px) {
+    .file-panel {
+      width: 100%;
+      max-width: 640px;
+      margin-right: 0;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      background: rgba(12, 13, 16, 0.92);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .file-panel {
+      transition: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+</style>
+
+<script>
+  const panel = document.getElementById("panel");
+  const scroller = document.querySelector<HTMLElement>(".file-scroll");
+  const tabs = document.querySelectorAll<HTMLButtonElement>(".file-tab");
+  const bodies = document.querySelectorAll<HTMLElement>(".file-body");
+  const headerIcons = document.querySelectorAll<HTMLElement>(".file-icon");
+  const promptPath = document.getElementById("promptPath");
+  const pathByTab: Record<string, string> = { about: "message", career: "career" };
+
+  const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  if (reduced) {
+    panel?.classList.add("show");
+  } else {
+    setTimeout(() => panel?.classList.add("show"), 150);
+  }
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      if (tab.classList.contains("current")) return;
+      tabs.forEach((t) => {
+        t.classList.remove("current");
+        t.setAttribute("aria-selected", "false");
+      });
+      tab.classList.add("current");
+      tab.setAttribute("aria-selected", "true");
+
+      const target = tab.getAttribute("data-tab") ?? "";
+      bodies.forEach((body) => {
+        body.classList.toggle("current", body.getAttribute("data-panel") === target);
+      });
+      headerIcons.forEach((icon) => {
+        icon.classList.toggle("current", icon.getAttribute("data-icon") === target);
+      });
+      if (promptPath) promptPath.textContent = `~/about/${pathByTab[target] ?? target}`;
+      if (scroller) scroller.scrollTop = 0;
+    });
+  });
+</script>

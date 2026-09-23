@@ -1,0 +1,662 @@
+<meta charset="utf-8">
+<title>Works | Takao Yoshida</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0d12;
+    --grid-line: rgba(255,255,255,0.05);
+    --ink:#e9ecf2;
+    --ink-dim: rgba(233,236,242,0.6);
+    --muted:#8890a0;
+    --rule: rgba(233,236,242,0.14);
+    --accent-solid:#5fc7ef;
+    --hl:#d8b463;
+    --panel-bg: rgba(255,255,255,0.03);
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --display: 'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+  }
+
+  html, body{ height:100%; overflow:hidden; }
+  body{ margin:0; background:var(--bg); color:var(--ink); }
+
+  .stage{
+    box-sizing:border-box;
+    position:relative;
+    height:100vh;
+    height:100svh;
+    overflow:hidden;
+    font-family: var(--mono);
+    display:flex;
+    flex-direction:column;
+    padding: clamp(28px,5vw,56px) clamp(24px,6vw,80px) clamp(72px,10vw,100px);
+  }
+
+  /* No photo on this page -- just the same faint grid the top page uses,
+     spread across the whole viewport instead of masked to one side. */
+  .grid-bg{
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 42px 42px;
+    -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 0%, #000 0%, #000 35%, transparent 85%);
+    mask-image: radial-gradient(ellipse 90% 80% at 50% 0%, #000 0%, #000 35%, transparent 85%);
+    pointer-events:none;
+  }
+
+  .page-header{
+    position:relative;
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap: 20px;
+    flex-wrap:wrap;
+    flex-shrink:0;
+    margin-bottom: clamp(28px,5vw,44px);
+    opacity:0;
+    transform: translateY(8px);
+    transition: opacity .7s ease, transform .7s ease;
+  }
+  .page-header.show{ opacity:1; transform:translateY(0); }
+
+  .page-title{
+    margin:0;
+    font-family: var(--display);
+    font-weight:700;
+    font-size: clamp(32px, 5vw, 46px);
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+
+  /* ---- list + detail split ---- */
+  .works-shell{
+    position:relative;
+    flex:1;
+    min-height:0;
+    display:flex;
+    gap: clamp(20px,3vw,32px);
+    opacity:0;
+    transform: translateY(10px);
+    transition: opacity .7s ease, transform .7s ease;
+  }
+  .works-shell.show{ opacity:1; transform:translateY(0); }
+
+  .works-list{
+    flex: 0 0 clamp(260px, 26vw, 340px);
+    min-height:0;
+    overflow-y:auto;
+    border: 1px solid var(--rule);
+    background: var(--panel-bg);
+    scrollbar-width: thin;
+    scrollbar-color: var(--rule) transparent;
+  }
+  .works-list::-webkit-scrollbar{ width:6px; }
+  .works-list::-webkit-scrollbar-thumb{ background: var(--rule); border-radius:3px; }
+
+  .work-row{
+    appearance:none;
+    background:none;
+    border:none;
+    border-bottom: 1px solid var(--rule);
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap: 14px;
+    padding: 16px 18px;
+    text-align:left;
+    cursor:pointer;
+    position:relative;
+    color: var(--muted);
+    transition: color .2s ease, background .2s ease;
+  }
+  .work-row::before{
+    content:"";
+    position:absolute;
+    left:0; top:0; bottom:0;
+    width:2px;
+    background: var(--hl);
+    transform: scaleY(0);
+    transition: transform .2s ease;
+  }
+  .work-row:last-child{ border-bottom:none; }
+  .row-index{
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    flex-shrink:0;
+  }
+  .row-name{
+    font-family: var(--display);
+    font-size: 14px;
+    color: var(--ink-dim);
+  }
+  .work-row:hover{ background: rgba(255,255,255,0.03); }
+  .work-row:hover .row-name{ color: var(--ink); }
+  .work-row.current{ background: rgba(255,255,255,0.05); }
+  .work-row.current::before{ transform: scaleY(1); }
+  .work-row.current .row-name{ color: var(--ink); font-weight:700; }
+  .work-row.current .row-index{ color: var(--hl); }
+
+  .works-detail{
+    flex:1;
+    min-width:0;
+    min-height:0;
+    overflow-y:auto;
+    border: 1px solid var(--rule);
+    background: var(--panel-bg);
+    padding: clamp(22px,3vw,32px);
+    scrollbar-width: thin;
+    scrollbar-color: var(--rule) transparent;
+  }
+  .works-detail::-webkit-scrollbar{ width:6px; }
+  .works-detail::-webkit-scrollbar-thumb{ background: var(--rule); border-radius:3px; }
+
+  .detail-panel{ display:none; }
+  .detail-panel.current{ display:block; }
+
+  .detail-shot{
+    position:relative;
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--rule);
+    margin-bottom: clamp(20px,3vw,28px);
+    background:
+      repeating-linear-gradient(135deg, rgba(255,255,255,0.025) 0 2px, transparent 2px 10px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .detail-shot img{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    object-fit:cover;
+    object-position: top;
+  }
+  .detail-shot-label{
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px dashed var(--rule);
+    padding: 6px 14px;
+  }
+
+  .detail-title{
+    margin:0 0 clamp(16px,3vw,20px);
+    font-family: var(--display);
+    font-weight:700;
+    font-size: clamp(20px, 2.6vw, 25px);
+    color: var(--ink);
+  }
+
+  .detail-section{ margin-bottom: clamp(20px,3vw,26px); }
+  .detail-section:last-child{ margin-bottom:0; }
+  .detail-label{
+    display:block;
+    margin-bottom: 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .stack-tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap: 8px 12px;
+  }
+  .stack-tags span{
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--hl);
+  }
+  .stack-tags span::before{ content:"#"; opacity:0.6; }
+
+  .detail-comment{
+    margin:0;
+    font-family: var(--display);
+    font-size: 14px;
+    line-height: 1.95;
+    color: var(--ink-dim);
+  }
+
+  .detail-link{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    margin-top: clamp(22px,3vw,28px);
+    text-decoration:none;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--rule);
+    transition: color .2s ease, border-color .2s ease;
+  }
+  .detail-link svg{
+    width:12px; height:12px;
+    stroke: currentColor;
+    transition: transform .2s ease;
+  }
+  .detail-link:hover,
+  .detail-link:focus-visible{
+    color: var(--hl);
+    border-color: var(--hl);
+  }
+  .detail-link:hover svg,
+  .detail-link:focus-visible svg{ transform: translateX(3px); }
+
+  @media (max-width: 780px){
+    .works-shell{ flex-direction:column; }
+    .works-list{ flex: 0 0 auto; max-height: 240px; }
+    .works-detail{ flex:1; }
+  }
+
+  .prompt-line{
+    position:absolute;
+    left: clamp(24px,7vw,96px);
+    right: clamp(24px,7vw,96px);
+    bottom: clamp(18px,4vw,28px);
+    margin:0;
+    display:flex;
+    align-items:center;
+    font-family: var(--mono);
+    font-size: clamp(11.5px, 1.5vw, 13px);
+    color: var(--muted);
+    opacity:0;
+    transition: opacity .6s ease;
+    cursor:text;
+  }
+  .prompt-line.show{ opacity:1; }
+  .prompt-prefix{ flex-shrink:0; white-space:nowrap; }
+  .cmd-input{
+    flex:0 1 320px;
+    min-width: 6ch;
+    margin-left:6px;
+    padding:0;
+    background:none;
+    border:none;
+    outline:none;
+    font: inherit;
+    color: var(--ink);
+    caret-color: var(--accent-solid);
+  }
+  .cmd-feedback{
+    margin-left:10px;
+    color:#e0836f;
+    opacity:0;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    transition: opacity .2s ease;
+  }
+  .cmd-feedback.show{ opacity:1; }
+
+  @media (prefers-reduced-motion: reduce){
+    .page-header, .works-shell, .prompt-line{ transition:none !important; }
+    .page-header, .works-shell{ opacity:1 !important; transform:none !important; }
+    .prompt-line{ opacity:1 !important; }
+  }
+
+  /* ---- site menu (hamburger, same treatment as the top page's nav) ---- */
+  .menu-toggle{
+    position:fixed;
+    top: clamp(20px,4vw,32px);
+    right: clamp(20px,4vw,32px);
+    z-index:60;
+    width:40px; height:40px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    background:none;
+    border:none;
+    padding:0;
+    cursor:pointer;
+    appearance:none;
+  }
+  .menu-toggle-bar{
+    width:22px; height:1.5px;
+    background: var(--ink);
+    transition: transform .3s ease, opacity .3s ease, background .2s ease;
+  }
+  .menu-toggle:hover .menu-toggle-bar{ background: var(--accent-solid); }
+  .menu-toggle.open .menu-toggle-bar:nth-child(1){ transform: translateY(7.5px) rotate(45deg); }
+  .menu-toggle.open .menu-toggle-bar:nth-child(2){ opacity:0; }
+  .menu-toggle.open .menu-toggle-bar:nth-child(3){ transform: translateY(-7.5px) rotate(-45deg); }
+
+  .site-menu{
+    position:fixed; inset:0;
+    z-index:55;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: rgba(6,8,11,0.88);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    opacity:0;
+    visibility:hidden;
+    transition: opacity .3s ease, visibility 0s linear .3s;
+  }
+  .site-menu.open{
+    opacity:1;
+    visibility:visible;
+    transition: opacity .3s ease, visibility 0s linear;
+  }
+
+  .site-menu-list{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap: clamp(4px,1vw,8px);
+  }
+
+  .site-menu-item{
+    position:relative;
+    isolation:isolate;
+    display:flex;
+    align-items:center;
+    text-decoration:none;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: clamp(24px, 4.4vw, 36px);
+    letter-spacing: 0.03em;
+    padding: 10px 34px 10px 6px;
+    transition: color .2s ease;
+  }
+  .site-menu-item::before{
+    content:"";
+    position:absolute;
+    top:0; bottom:0; left:-10px; right:-14px;
+    background: linear-gradient(90deg, rgba(233,236,242,0.16), rgba(233,236,242,0.03) 85%);
+    -webkit-mask-image: url("band-mask.svg");
+    mask-image: url("band-mask.svg");
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    opacity:0;
+    transform: scaleX(0.7);
+    transform-origin: left center;
+    transition: opacity .2s ease, transform .25s ease;
+    z-index:-1;
+  }
+  .site-menu-item:hover,
+  .site-menu-item:focus-visible,
+  .site-menu-item.current{ color: var(--ink); outline:none; }
+  .site-menu-item:hover::before,
+  .site-menu-item:focus-visible::before,
+  .site-menu-item.current::before{ opacity:1; transform: scaleX(1); }
+
+  @media (prefers-reduced-motion: reduce){
+    .menu-toggle-bar, .site-menu{ transition:none !important; }
+  }
+</style>
+
+<div class="stage" id="stage">
+  <div class="grid-bg" aria-hidden="true"></div>
+
+  <button type="button" class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="siteMenu" aria-label="メニュー">
+    <span class="menu-toggle-bar"></span>
+    <span class="menu-toggle-bar"></span>
+    <span class="menu-toggle-bar"></span>
+  </button>
+
+  <div class="site-menu" id="siteMenu" aria-hidden="true">
+    <nav class="site-menu-list" aria-label="サイトメニュー">
+      <a class="site-menu-item" href="index.html"><span>Top</span></a>
+      <a class="site-menu-item" href="about.html"><span>About</span></a>
+      <a class="site-menu-item current" href="works.html" aria-current="page"><span>Works</span></a>
+      <a class="site-menu-item" href="contact.html"><span>Contact</span></a>
+    </nav>
+  </div>
+
+  <header class="page-header" id="pageHeader">
+    <h1 class="page-title">Works</h1>
+  </header>
+
+  <div class="works-shell" id="worksShell">
+    <nav class="works-list" id="worksList" aria-label="実績一覧">
+      <button type="button" class="work-row current" data-work="w1">
+        <span class="row-index">01</span>
+        <span class="row-name">プロジェクト名を入力</span>
+      </button>
+      <button type="button" class="work-row" data-work="w2">
+        <span class="row-index">02</span>
+        <span class="row-name">プロジェクト名を入力</span>
+      </button>
+      <button type="button" class="work-row" data-work="w3">
+        <span class="row-index">03</span>
+        <span class="row-name">プロジェクト名を入力</span>
+      </button>
+      <button type="button" class="work-row" data-work="w4">
+        <span class="row-index">04</span>
+        <span class="row-name">プロジェクト名を入力</span>
+      </button>
+    </nav>
+
+    <div class="works-detail" id="worksDetail">
+      <div class="detail-panel current" data-work-panel="w1">
+        <div class="detail-shot"><span class="detail-shot-label">screenshot</span></div>
+        <h2 class="detail-title">プロジェクト名を入力</h2>
+
+        <div class="detail-section">
+          <span class="detail-label">Tech Stack</span>
+          <div class="stack-tags"><span>Tag</span><span>Tag</span><span>Tag</span></div>
+        </div>
+
+        <div class="detail-section">
+          <span class="detail-label">Comment</span>
+          <p class="detail-comment">ここに、どんな課題があり、何を考えてどう作ったかのコメントが入ります。</p>
+        </div>
+
+        <a class="detail-link" href="#">
+          サイトを見る
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      <div class="detail-panel" data-work-panel="w2">
+        <div class="detail-shot"><span class="detail-shot-label">screenshot</span></div>
+        <h2 class="detail-title">プロジェクト名を入力</h2>
+
+        <div class="detail-section">
+          <span class="detail-label">Tech Stack</span>
+          <div class="stack-tags"><span>Tag</span><span>Tag</span><span>Tag</span></div>
+        </div>
+
+        <div class="detail-section">
+          <span class="detail-label">Comment</span>
+          <p class="detail-comment">ここに、どんな課題があり、何を考えてどう作ったかのコメントが入ります。</p>
+        </div>
+
+        <a class="detail-link" href="#">
+          サイトを見る
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      <div class="detail-panel" data-work-panel="w3">
+        <div class="detail-shot"><span class="detail-shot-label">screenshot</span></div>
+        <h2 class="detail-title">プロジェクト名を入力</h2>
+
+        <div class="detail-section">
+          <span class="detail-label">Tech Stack</span>
+          <div class="stack-tags"><span>Tag</span><span>Tag</span><span>Tag</span></div>
+        </div>
+
+        <div class="detail-section">
+          <span class="detail-label">Comment</span>
+          <p class="detail-comment">ここに、どんな課題があり、何を考えてどう作ったかのコメントが入ります。</p>
+        </div>
+
+        <a class="detail-link" href="#">
+          サイトを見る
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      <div class="detail-panel" data-work-panel="w4">
+        <div class="detail-shot"><span class="detail-shot-label">screenshot</span></div>
+        <h2 class="detail-title">プロジェクト名を入力</h2>
+
+        <div class="detail-section">
+          <span class="detail-label">Tech Stack</span>
+          <div class="stack-tags"><span>Tag</span><span>Tag</span><span>Tag</span></div>
+        </div>
+
+        <div class="detail-section">
+          <span class="detail-label">Comment</span>
+          <p class="detail-comment">ここに、どんな課題があり、何を考えてどう作ったかのコメントが入ります。</p>
+        </div>
+
+        <a class="detail-link" href="#">
+          サイトを見る
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <p class="prompt-line" id="promptLine">
+    <span class="prompt-prefix">yoshida@portfolio:~/works/<span id="promptPath">01</span>$</span>
+    <input type="text" id="cmdInput" class="cmd-input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="コマンド入力(例: cd about)">
+    <span class="cmd-feedback" id="cmdFeedback"></span>
+  </p>
+</div>
+
+<noscript>
+<style>
+  .page-header, .works-shell, .prompt-line{ opacity:1 !important; transform:none !important; }
+</style>
+</noscript>
+
+<script>
+(function(){
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var header = document.getElementById('pageHeader');
+  var shell = document.getElementById('worksShell');
+  var promptLine = document.getElementById('promptLine');
+  var rows = document.querySelectorAll('.work-row');
+  var panels = document.querySelectorAll('.detail-panel');
+  var detail = document.getElementById('worksDetail');
+  var promptPath = document.getElementById('promptPath');
+
+  if (reduced){
+    header.classList.add('show');
+    shell.classList.add('show');
+    promptLine.classList.add('show');
+  } else {
+    setTimeout(function(){ header.classList.add('show'); }, 100);
+    setTimeout(function(){ shell.classList.add('show'); }, 220);
+    setTimeout(function(){ promptLine.classList.add('show'); }, 420);
+  }
+
+  rows.forEach(function(row){
+    row.addEventListener('click', function(){
+      if (row.classList.contains('current')) return;
+      rows.forEach(function(r){ r.classList.remove('current'); });
+      row.classList.add('current');
+
+      var target = row.getAttribute('data-work');
+      panels.forEach(function(panel){
+        panel.classList.toggle('current', panel.getAttribute('data-work-panel') === target);
+      });
+      promptPath.textContent = row.querySelector('.row-index').textContent;
+      detail.scrollTop = 0;
+    });
+  });
+})();
+</script>
+
+<script>
+(function(){
+  var toggle = document.getElementById('menuToggle');
+  var menu = document.getElementById('siteMenu');
+
+  function closeMenu(){
+    toggle.classList.remove('open');
+    toggle.setAttribute('aria-expanded', 'false');
+    menu.classList.remove('open');
+    menu.setAttribute('aria-hidden', 'true');
+  }
+  function openMenu(){
+    toggle.classList.add('open');
+    toggle.setAttribute('aria-expanded', 'true');
+    menu.classList.add('open');
+    menu.setAttribute('aria-hidden', 'false');
+  }
+
+  toggle.addEventListener('click', function(){
+    if (menu.classList.contains('open')) closeMenu(); else openMenu();
+  });
+  menu.addEventListener('click', function(e){
+    if (e.target === menu) closeMenu();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeMenu();
+  });
+})();
+</script>
+
+<script>
+(function(){
+  var promptLine = document.getElementById('promptLine');
+  var cmdInput = document.getElementById('cmdInput');
+  var cmdFeedback = document.getElementById('cmdFeedback');
+  var routes = { top:'index.html', home:'index.html', about:'about.html', works:'works.html', contact:'contact.html' };
+  var feedbackTimer;
+
+  function showFeedback(text){
+    cmdFeedback.textContent = text;
+    cmdFeedback.classList.add('show');
+    clearTimeout(feedbackTimer);
+    feedbackTimer = setTimeout(function(){ cmdFeedback.classList.remove('show'); }, 2200);
+  }
+
+  function navigateTo(url){ window.location.href = url; }
+
+  function handleCommand(raw){
+    var parts = raw.trim().split(/\s+/);
+    var cmd = parts[0].toLowerCase();
+
+    if (cmd === 'cd'){
+      var arg = (parts[1] || '').toLowerCase().replace(/^\.\//, '').replace(/\/$/, '');
+      if (!arg || arg === '~' || arg === '/' || arg === 'top' || arg === 'home' || arg === '..'){
+        navigateTo('index.html'); return;
+      }
+      if (/^\d+$/.test(arg)){
+        var num = arg.replace(/^0+(?=\d)/, '');
+        var row = document.querySelector('.work-row[data-work="w' + num + '"]');
+        if (row){ row.click(); return; }
+        showFeedback('cd: no such file or directory: ' + parts[1]);
+        return;
+      }
+      if (routes[arg]){ navigateTo(routes[arg]); return; }
+      showFeedback('cd: no such file or directory: ' + parts[1]);
+      return;
+    }
+    if (cmd === 'ls'){ showFeedback('01  02  03  04'); return; }
+    if (cmd === 'clear'){ cmdFeedback.classList.remove('show'); return; }
+    showFeedback('command not found: ' + cmd);
+  }
+
+  promptLine.addEventListener('click', function(e){
+    if (e.target !== cmdInput) cmdInput.focus();
+  });
+  cmdInput.addEventListener('keydown', function(e){
+    if (e.key !== 'Enter') return;
+    var raw = cmdInput.value;
+    if (!raw.trim()) return;
+    handleCommand(raw);
+    cmdInput.value = '';
+  });
+})();
+</script>

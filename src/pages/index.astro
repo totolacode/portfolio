@@ -1,0 +1,35 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import SiteMenu from "@/components/SiteMenu.astro";
+import BackgroundPhoto from "@/components/BackgroundPhoto.astro";
+import GridBackdrop from "@/components/GridBackdrop.astro";
+import Hero from "@/components/Hero.astro";
+import TerminalPrompt from "@/components/TerminalPrompt.astro";
+---
+
+<Layout title="Takao Yoshida | Frontend Engineer">
+  <div class="stage">
+    <SiteMenu current="top" />
+    <BackgroundPhoto mode="slideshow" />
+    <GridBackdrop variant="hero" />
+
+    <Hero firstName="Takao" lastName="Yoshida" role="Frontend Engineer" />
+
+    <TerminalPrompt initialPath="~" showDelay={2300} />
+  </div>
+</Layout>
+
+<style>
+  .stage {
+    box-sizing: border-box;
+    position: relative;
+    height: 100vh;
+    height: 100svh;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: clamp(28px, 6vw, 64px) clamp(24px, 7vw, 96px);
+    overflow: hidden;
+    font-family: var(--mono);
+  }
+</style>

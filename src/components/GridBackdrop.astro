@@ -1,0 +1,33 @@
+---
+interface Props {
+  /** "hero": Top's tight, left-anchored ellipse behind the headline.
+   *  "wide": Works' broad, top-anchored spread across the whole page. */
+  variant?: "hero" | "wide";
+}
+
+const { variant = "wide" } = Astro.props;
+---
+
+<div class:list={["grid-bg", variant]} aria-hidden="true"></div>
+
+<style>
+  .grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 42px 42px;
+    pointer-events: none;
+  }
+
+  .grid-bg.hero {
+    -webkit-mask-image: radial-gradient(ellipse 55% 70% at 20% 50%, #000 0%, #000 22%, transparent 65%);
+    mask-image: radial-gradient(ellipse 55% 70% at 20% 50%, #000 0%, #000 22%, transparent 65%);
+  }
+
+  .grid-bg.wide {
+    -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 0%, #000 0%, #000 35%, transparent 85%);
+    mask-image: radial-gradient(ellipse 90% 80% at 50% 0%, #000 0%, #000 35%, transparent 85%);
+  }
+</style>

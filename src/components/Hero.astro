@@ -1,0 +1,376 @@
+---
+interface Props {
+  firstName: string;
+  lastName: string;
+  role: string;
+}
+
+const { firstName, lastName, role } = Astro.props;
+const fullName = `${firstName} ${lastName}`;
+---
+
+<div class="title-block">
+  <div class="identity">
+    <div class="hero-figure" id="heroFigure">
+      <h1 style="margin:0; line-height:0;">
+        <svg
+          class="headline-svg"
+          id="heroSvg"
+          viewBox="0 0 1000 300"
+          xmlns="http://www.w3.org/2000/svg"
+          role="img"
+          aria-label={fullName}
+        >
+          <defs>
+            <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#fcd34d"></stop>
+              <stop offset="25%" stop-color="#fb7185"></stop>
+              <stop offset="50%" stop-color="#38bdf8"></stop>
+              <stop offset="75%" stop-color="#22d3ee"></stop>
+              <stop offset="100%" stop-color="#a78bfa"></stop>
+            </linearGradient>
+            <radialGradient id="revealGrad" gradientUnits="userSpaceOnUse" cx="200" cy="150" r="140">
+              <stop offset="0%" stop-color="#fff"></stop>
+              <stop offset="62%" stop-color="#fff"></stop>
+              <stop offset="100%" stop-color="#000"></stop>
+            </radialGradient>
+            <mask id="revealMask">
+              <rect id="maskRect" x="0" y="0" width="1000" height="300" fill="url(#revealGrad)"></rect>
+            </mask>
+          </defs>
+          <text id="txtBase" class="txt-base" x="0" y="150" text-anchor="start" dominant-baseline="middle">
+            {fullName}
+          </text>
+          <text id="txtDraw" class="txt-draw" x="0" y="150" text-anchor="start" dominant-baseline="middle">
+            {fullName}
+          </text>
+          <text
+            id="txtFill"
+            class="txt-fill"
+            x="0"
+            y="150"
+            text-anchor="start"
+            dominant-baseline="middle"
+            mask="url(#revealMask)"
+          >
+            {fullName}
+          </text>
+        </svg>
+      </h1>
+    </div>
+
+    <p class="role-label" id="roleLabel">{role}</p>
+  </div>
+
+  <nav class="menu" id="menu" aria-label="メインメニュー">
+    <a class="menu-item current" href="/about" aria-current="page"><span>About</span></a>
+    <a class="menu-item" href="/works"><span>Works</span></a>
+    <a class="menu-item" href="/contact"><span>Contact</span></a>
+  </nav>
+</div>
+
+<style>
+  .title-block {
+    position: relative;
+    width: min(90vw, 620px);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: clamp(20px, 3.4vw, 30px);
+  }
+
+  .identity {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+  }
+
+  .hero-figure {
+    position: relative;
+    display: block;
+    width: 100%;
+    cursor: crosshair;
+    line-height: 0;
+  }
+
+  .headline-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .headline-svg text {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 220px;
+  }
+
+  .txt-base {
+    fill: none;
+    stroke: var(--ink-dim);
+    stroke-width: 1.1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .txt-draw {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1.3;
+    vector-effect: non-scaling-stroke;
+    stroke-dasharray: 3000;
+    stroke-dashoffset: 3000;
+    transition: stroke-dashoffset 1.9s cubic-bezier(0.5, 0, 0.3, 1);
+  }
+  .txt-fill {
+    fill: none;
+    stroke: url(#accentGrad);
+    stroke-width: 1.3;
+    vector-effect: non-scaling-stroke;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .hero-figure.hover .txt-fill {
+    opacity: 1;
+  }
+
+  .role-label {
+    margin: 0;
+    margin-top: -34px;
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: clamp(13px, 1.9vw, 16px);
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    opacity: 0;
+    transform: translateY(6px);
+    transition:
+      opacity 0.6s ease,
+      transform 0.6s ease;
+  }
+  .role-label.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .menu {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(4px, 1vw, 8px);
+    width: 100%;
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+      opacity 0.6s ease,
+      transform 0.6s ease;
+  }
+  .menu.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .menu-item {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: clamp(15px, 2vw, 18px);
+    letter-spacing: 0.03em;
+    padding: 6px 26px 6px 4px;
+    margin-left: 10px;
+    width: fit-content;
+    transition: color 0.2s ease;
+  }
+  .menu-item::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -10px;
+    right: -14px;
+    background: linear-gradient(90deg, rgba(233, 236, 242, 0.16), rgba(233, 236, 242, 0.03) 85%);
+    -webkit-mask-image: url("/band-mask.svg");
+    mask-image: url("/band-mask.svg");
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    opacity: 0;
+    transform: scaleX(0.7);
+    transform-origin: left center;
+    transition:
+      opacity 0.2s ease,
+      transform 0.25s ease;
+    z-index: -1;
+  }
+  .menu-item:hover,
+  .menu-item:focus-visible,
+  .menu-item.current {
+    color: var(--ink);
+    outline: none;
+  }
+  .menu-item:hover::before,
+  .menu-item:focus-visible::before,
+  .menu-item.current::before {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  .menu-item:hover span,
+  .menu-item:focus-visible span {
+    animation: textFlicker 0.8s linear;
+  }
+  @keyframes textFlicker {
+    0% {
+      opacity: 1;
+    }
+    8% {
+      opacity: 0.3;
+    }
+    12% {
+      opacity: 1;
+    }
+    20% {
+      opacity: 0.4;
+    }
+    24% {
+      opacity: 1;
+    }
+    55% {
+      opacity: 1;
+    }
+    60% {
+      opacity: 0.5;
+    }
+    64% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .txt-draw,
+    .txt-fill,
+    .role-label,
+    .menu {
+      transition: none !important;
+    }
+    .menu-item:hover span,
+    .menu-item:focus-visible span {
+      animation: none !important;
+    }
+  }
+</style>
+
+<script>
+  const figure = document.getElementById("heroFigure");
+  const svg = document.getElementById("heroSvg") as SVGSVGElement | null;
+  const txtBase = document.getElementById("txtBase") as SVGTextElement | null;
+  const txtDraw = document.getElementById("txtDraw") as SVGTextElement | null;
+  const revealGrad = document.getElementById("revealGrad");
+  const maskRect = document.getElementById("maskRect");
+  const roleLabel = document.getElementById("roleLabel");
+  const menu = document.getElementById("menu");
+  const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+  if (figure && svg && txtBase && txtDraw && revealGrad && maskRect && roleLabel && menu) {
+    // hovering a menu item hands the "current" selection to it, and it stays there
+    const menuItems = menu.querySelectorAll<HTMLAnchorElement>(".menu-item");
+    menuItems.forEach((item) => {
+      item.addEventListener("mouseenter", () => {
+        menuItems.forEach((i) => {
+          i.classList.remove("current");
+          i.removeAttribute("aria-current");
+        });
+        item.classList.add("current");
+        item.setAttribute("aria-current", "page");
+      });
+    });
+
+    // headline outline-draw + hover reveal
+    function layoutSvg(): void {
+      let bbox: DOMRect | { x: number; y: number; width: number; height: number };
+      try {
+        bbox = txtBase!.getBBox();
+      } catch {
+        bbox = { x: 0, y: 0, width: 900, height: 220 };
+      }
+      const padX = Math.max(bbox.height * 0.03, 4);
+      const padY = Math.max(bbox.height * 0.22, 24);
+      const w = bbox.width + padX + padY;
+      const h = bbox.height + padY * 2;
+      const cy = h / 2;
+      const xAttr = padX - bbox.x;
+
+      svg!.setAttribute("viewBox", `0 0 ${w} ${h}`);
+      [txtBase, txtDraw, document.getElementById("txtFill")].forEach((t) => {
+        t?.setAttribute("x", String(xAttr));
+        t?.setAttribute("y", String(cy));
+      });
+      maskRect!.setAttribute("width", String(w));
+      maskRect!.setAttribute("height", String(h));
+      revealGrad!.setAttribute("cx", String(padX + bbox.width * 0.3));
+      revealGrad!.setAttribute("cy", String(cy));
+      revealGrad!.setAttribute("r", String(Math.max(bbox.width, bbox.height) * 0.18));
+
+      const dash = Math.ceil((bbox.width + bbox.height) * 3);
+      txtDraw!.style.strokeDasharray = String(dash);
+      if (!figure!.classList.contains("played")) txtDraw!.style.strokeDashoffset = String(dash);
+    }
+
+    function svgPoint(clientX: number, clientY: number): { x: number; y: number } {
+      const ctm = svg!.getScreenCTM();
+      if (!ctm) return { x: 0, y: 0 };
+      const pt = svg!.createSVGPoint();
+      pt.x = clientX;
+      pt.y = clientY;
+      const loc = pt.matrixTransform(ctm.inverse());
+      return { x: loc.x, y: loc.y };
+    }
+
+    figure.addEventListener("pointermove", (e: PointerEvent) => {
+      const p = svgPoint(e.clientX, e.clientY);
+      revealGrad!.setAttribute("cx", String(p.x));
+      revealGrad!.setAttribute("cy", String(p.y));
+    });
+    figure.addEventListener("pointerenter", () => figure.classList.add("hover"));
+    figure.addEventListener("pointerleave", () => figure.classList.remove("hover"));
+
+    let introStarted = false;
+    function startIntro(): void {
+      if (introStarted) return;
+      introStarted = true;
+      layoutSvg();
+      if (reduced) {
+        figure!.classList.add("played");
+        txtDraw!.style.strokeDashoffset = "0";
+        roleLabel!.classList.add("show");
+        menu!.classList.add("show");
+        return;
+      }
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          figure!.classList.add("played");
+          txtDraw!.style.strokeDashoffset = "0";
+        });
+      });
+      setTimeout(() => roleLabel!.classList.add("show"), 1500);
+      setTimeout(() => menu!.classList.add("show"), 1900);
+    }
+
+    if (document.fonts?.load) {
+      Promise.all([document.fonts.load('700 100px "Zen Kaku Gothic New"'), document.fonts.ready])
+        .then(startIntro)
+        .catch(startIntro);
+      setTimeout(startIntro, 1200);
+    } else {
+      startIntro();
+    }
+  }
+</script>
