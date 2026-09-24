@@ -2,7 +2,7 @@
 export type CurrentPage = "top" | "about" | "works";
 
 interface Props {
-  current: CurrentPage;
+  current?: CurrentPage;
 }
 
 const { current } = Astro.props;

@@ -50,13 +50,23 @@ import { origin, summary, summaryHighlight, career } from "@/data/career";
         <p class="salutation">技術は広く、関わりは深く。</p>
 
         <p>
-          仕事ではWordPress、EC-CUBE、Shopifyでのサイト・EC構築を中心に、Nuxt.js、Laravel、Firebase、AWSによる自社サービスの開発（Stripeによる課金機能など）にも携わってきました。
-          個人ではAstro、minista、Vite、React、Next.jsなどを触り、パワーCMSやmicroCMSにも触れています。
+          仕事ではWordPress、EC-CUBE、Shopifyでのサイト・EC構築を中心に、<br />
+          Nuxt.js、Laravel、Firebase、AWSによる自社サービスの開発（Stripeによる課金機能など）にも携わってきました。
+        </p>
+
+        <p>
+          個人ではAstro、minista、Vite、React、Next.jsなどを触り、microCMSにも触れています。<br />
           <span class="hl">新しい技術に触れること自体が好き</span>で、休みの日でも気づけば新しいツールを触っています。
         </p>
 
         <p>
-          一方で、関わる案件には数より深さを大事にしています。CMSの管理画面ひとつでも、クライアントが迷わず使えるにはどうするかを考えるのが好きです。「できない」で終わらせず、今できる範囲で形にする方法を探し、現場の困りごとから生まれたツールを実際の業務で使い続けてもらえることに、いちばんやりがいを感じます。
+          一方で、関わる案件には数より深さを大事にしています。<br />
+          CMSの管理画面ひとつでも、クライアントが迷わず使えるにはどうするかを考えるのが好きです。
+        </p>
+
+        <p>
+          「できない」で終わらせず、今できる範囲で形にする方法を探す。<br />
+          現場の困りごとから生まれたツールを、実際の業務で使い続けてもらえることに、いちばんやりがいを感じます。<br />
           <span class="hl">細部まで妥協せず向き合いたい</span>と考えています。
         </p>
       </div>
@@ -258,7 +268,11 @@ import { origin, summary, summaryHighlight, career } from "@/data/career";
     color: var(--ink);
   }
   .file-body p {
-    margin: 0 0 clamp(14px, 2.4vw, 18px);
+    margin: 0 0 clamp(18px, 3vw, 24px);
+    /* wrap Japanese at phrase boundaries, not mid-word */
+    word-break: auto-phrase;
+    line-break: strict;
+    text-wrap: pretty;
   }
   .file-body p:last-child {
     margin-bottom: 0;

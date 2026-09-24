@@ -1,4 +1,6 @@
 ---
+import { career } from "@/data/career";
+
 interface Props {
   /** e.g. "~", "~/about/message", "~/works/01" */
   initialPath: string;
@@ -7,9 +9,19 @@ interface Props {
 }
 
 const { initialPath, showDelay = 500 } = Astro.props;
+
+// `git log` easter egg: the career list, one fake commit per job
+function fakeHash(text: string): string {
+  let h = 5381;
+  for (const ch of text) h = (h * 33 + ch.codePointAt(0)!) >>> 0;
+  return h.toString(16).padStart(8, "0").slice(0, 7);
+}
+const gitLog = career.map((c) => `${fakeHash(c.company + c.period)} ${c.period}  ${c.company}`);
 ---
 
-<p class="prompt-line" id="promptLine" data-show-delay={showDelay}>
+<pre class="cmd-output" id="cmdOutput" role="status" aria-live="polite"></pre>
+
+<p class="prompt-line" id="promptLine" data-show-delay={showDelay} data-git-log={JSON.stringify(gitLog)}>
   <span class="prompt-prefix">yoshida@portfolio:<span id="promptPath">{initialPath}</span>$</span>
   <input
     type="text"
@@ -19,7 +31,8 @@ const { initialPath, showDelay = 500 } = Astro.props;
     autocapitalize="off"
     autocorrect="off"
     spellcheck="false"
-    aria-label="コマンド入力(例: cd about)"
+    placeholder="type help"
+    aria-label="コマンド入力(例: help)"
   />
   <span class="cmd-feedback" id="cmdFeedback"></span>
 </p>
@@ -59,6 +72,40 @@ const { initialPath, showDelay = 500 } = Astro.props;
     color: var(--ink);
     caret-color: var(--accent-solid);
   }
+  .cmd-input::placeholder {
+    color: var(--muted);
+    opacity: 0.45;
+  }
+  /* multi-line command output (help, ls, ...), stacked just above the prompt */
+  .cmd-output {
+    position: absolute;
+    left: clamp(24px, 7vw, 96px);
+    right: auto;
+    max-width: calc(100% - 2 * clamp(24px, 7vw, 96px));
+    bottom: calc(clamp(18px, 4vw, 28px) + 2.8em);
+    z-index: 20;
+    margin: 0;
+    padding: 12px 16px;
+    background: rgba(10, 13, 18, 0.94);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+    font-family: var(--mono);
+    font-size: clamp(11.5px, 1.5vw, 13px);
+    line-height: 1.8;
+    color: var(--ink-dim);
+    white-space: pre-wrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(4px);
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease;
+  }
+  .cmd-output.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
   .cmd-feedback {
     margin-left: 10px;
     color: #e0836f;
@@ -77,6 +124,10 @@ const { initialPath, showDelay = 500 } = Astro.props;
       transition: none !important;
       opacity: 1 !important;
     }
+    .cmd-output {
+      transition: none !important;
+      transform: none !important;
+    }
   }
 </style>
 
@@ -91,6 +142,8 @@ const { initialPath, showDelay = 500 } = Astro.props;
   const promptLine = document.getElementById("promptLine");
   const cmdInput = document.getElementById("cmdInput") as HTMLInputElement | null;
   const cmdFeedback = document.getElementById("cmdFeedback");
+  const cmdOutput = document.getElementById("cmdOutput");
+  const promptPath = document.getElementById("promptPath");
 
   let feedbackTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -102,6 +155,43 @@ const { initialPath, showDelay = 500 } = Astro.props;
     feedbackTimer = setTimeout(() => cmdFeedback.classList.remove("show"), 2200);
   }
 
+  let outputTimer: ReturnType<typeof setTimeout> | undefined;
+
+  function showOutput(lines: string[]): void {
+    if (!cmdOutput) return;
+    cmdOutput.textContent = lines.join("\n");
+    cmdOutput.classList.add("show");
+    clearTimeout(outputTimer);
+    outputTimer = setTimeout(hideOutput, 14000);
+  }
+
+  function hideOutput(): void {
+    clearTimeout(outputTimer);
+    cmdOutput?.classList.remove("show");
+  }
+
+  // sub-targets of the current page (About's tabs, Works' rows), see data-cd-target below
+  function pageTargets(): string[] {
+    return Array.from(document.querySelectorAll<HTMLElement>("[data-cd-target]")).map((el) => el.dataset.cdTarget ?? "");
+  }
+
+  function showHelp(): void {
+    const targets = pageTargets();
+    const pad = (cmd: string) => `  ${cmd.padEnd(16)}`;
+    showOutput([
+      "available commands:",
+      `${pad("cd <page>")}go to a page: top, about, works`,
+      ...(targets.length ? [`${pad(`cd <${targets.length > 3 ? "n" : "tab"}>`)}open on this page: ${targets.join(", ")}`] : []),
+      `${pad("ls")}list pages and files`,
+      `${pad("cat <file>")}read a file (see ls)`,
+      `${pad("git log")}career, as a commit history`,
+      `${pad("pwd")}show where you are`,
+      `${pad("whoami")}who is this?`,
+      `${pad("clear")}clear this output`,
+      `${pad("help")}show this message`,
+    ]);
+  }
+
   function navigateTo(url: string): void {
     window.location.href = url;
   }
@@ -109,6 +199,55 @@ const { initialPath, showDelay = 500 } = Astro.props;
   function handleCommand(raw: string): void {
     const parts = raw.trim().split(/\s+/);
     const cmd = parts[0]?.toLowerCase() ?? "";
+
+    hideOutput();
+    cmdFeedback?.classList.remove("show");
+
+    if (cmd === "help" || cmd === "?" || cmd === "--help" || cmd === "-h" || cmd === "man") {
+      showHelp();
+      return;
+    }
+    if (cmd === "pwd") {
+      showOutput([`/home/yoshida/portfolio${(promptPath?.textContent ?? "~").replace(/^~/, "")}`]);
+      return;
+    }
+    if (cmd === "whoami") {
+      showOutput(["takao yoshida - frontend engineer", "try: help"]);
+      return;
+    }
+    if (cmd === "cat") {
+      const file = parts[1] ?? "";
+      if (!file) {
+        showOutput(["cat: missing file operand (try: cat profile.txt)"]);
+      } else if (file === "profile.txt") {
+        showOutput([
+          "name  : Takao Yoshida",
+          "role  : Frontend Engineer",
+          "from  : Wakkanai -> Sapporo",
+          "stack : WordPress, EC-CUBE, Shopify, Nuxt.js, Laravel, Astro",
+          "likes : trying new tools, manga",
+        ]);
+      } else {
+        showOutput([`cat: ${file}: No such file or directory`]);
+      }
+      return;
+    }
+    if (cmd === "git") {
+      const sub = parts[1]?.toLowerCase() ?? "";
+      if (sub === "log") {
+        const log: string[] = JSON.parse(promptLine?.dataset.gitLog ?? "[]");
+        showOutput(["(HEAD -> main)", ...log]);
+      } else if (sub === "status") {
+        showOutput(["On branch main", "nothing to commit, working tree clean"]);
+      } else {
+        showOutput([`git: '${sub}' is not a git command. try: git log`]);
+      }
+      return;
+    }
+    if (cmd === "sudo") {
+      showOutput(["yoshida is not in the sudoers file. This incident will be reported."]);
+      return;
+    }
 
     if (cmd === "cd") {
       const rawArg = parts[1] ?? "";
@@ -138,20 +277,19 @@ const { initialPath, showDelay = 500 } = Astro.props;
     }
 
     if (cmd === "ls") {
-      showFeedback("top  about  works");
+      const targets = pageTargets();
+      showOutput(["top/  about/  works/  profile.txt", ...(targets.length ? [`here: ${targets.join("  ")}`] : [])]);
       return;
     }
-    if (cmd === "clear") {
-      cmdFeedback?.classList.remove("show");
-      return;
-    }
-    showFeedback(`command not found: ${cmd}`);
+    if (cmd === "clear") return; // output and feedback are already cleared above
+    showFeedback(`command not found: ${cmd}  (try: help)`);
   }
 
   promptLine?.addEventListener("click", (e) => {
     if (e.target !== cmdInput) cmdInput?.focus();
   });
   cmdInput?.addEventListener("keydown", (e: KeyboardEvent) => {
+    if (e.key === "Escape") hideOutput();
     if (e.key !== "Enter") return;
     const raw = cmdInput.value;
     if (!raw.trim()) return;

@@ -1,0 +1,178 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import SiteMenu from "@/components/SiteMenu.astro";
+import GridBackdrop from "@/components/GridBackdrop.astro";
+import TerminalPrompt from "@/components/TerminalPrompt.astro";
+---
+
+<Layout
+  title="404 | Takao Yoshida"
+  description="お探しのページは見つかりませんでした。"
+  noindex
+>
+  <div class="stage">
+    <GridBackdrop variant="hero" />
+    <SiteMenu />
+
+    <main class="content">
+      <h1 class="code" aria-label="404 Not Found">404</h1>
+
+      <div class="term">
+        <p class="line" style="--i: 0">
+          <span class="ps">yoshida@portfolio:~$</span> cd <span class="req" data-req>/</span>
+        </p>
+        <p class="line err" style="--i: 1">bash: cd: <span class="req" data-req>/</span>: No such file or directory</p>
+
+        <p class="line note" style="--i: 2">
+          お探しのページは見つかりませんでした。<br />
+          URLが変わったか、最初からなかったのかもしれません。<br />
+          きっと、ただのタイプミスです。私のせいではないはず。
+        </p>
+
+        <p class="line" style="--i: 3"><span class="ps">yoshida@portfolio:~$</span> ls</p>
+        <nav class="line links" style="--i: 4" aria-label="ページ一覧">
+          <a href="/">top/</a>
+          <a href="/about">about/</a>
+          <a href="/works">works/</a>
+        </nav>
+      </div>
+    </main>
+
+    <TerminalPrompt initialPath="~" showDelay={3200} />
+  </div>
+</Layout>
+
+<style>
+  .stage {
+    box-sizing: border-box;
+    position: relative;
+    height: 100vh;
+    height: 100svh;
+    display: flex;
+    align-items: center;
+    padding: clamp(28px, 6vw, 64px) clamp(24px, 7vw, 96px);
+    overflow: hidden;
+    font-family: var(--mono);
+  }
+
+  .content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(14px, 3vw, 28px);
+    width: min(100%, 640px);
+  }
+
+  .code {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(88px, 22vw, 200px);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    color: transparent;
+    -webkit-text-stroke: 1.3px var(--ink);
+    animation: flicker 3.2s steps(1, end) 0.4s 1 both;
+  }
+
+  .term {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: clamp(12px, 1.6vw, 14px);
+    line-height: 1.9;
+    color: var(--ink-dim);
+    word-break: break-all;
+  }
+  .term p,
+  .term nav {
+    margin: 0;
+  }
+  .ps {
+    color: var(--muted);
+  }
+  .req {
+    color: var(--ink);
+  }
+  .err {
+    color: #e0836f;
+  }
+  .note {
+    font-family: var(--display);
+    font-size: clamp(13px, 1.7vw, 14.5px);
+    word-break: normal;
+    line-break: strict;
+    color: var(--ink);
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 22px;
+  }
+  .links a {
+    color: var(--accent-solid);
+    text-decoration: none;
+    border-bottom: 1px dashed transparent;
+  }
+  .links a:hover,
+  .links a:focus-visible {
+    border-bottom-color: currentColor;
+    outline: none;
+  }
+  /* the terminal lines print one after another */
+  .line {
+    opacity: 0;
+    animation: print 0.35s ease forwards;
+    animation-delay: calc(0.7s + var(--i) * 0.45s);
+  }
+
+  @keyframes print {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  /* a short power-on flicker for the big number */
+  @keyframes flicker {
+    0% {
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    16% {
+      opacity: 0.25;
+    }
+    22% {
+      opacity: 1;
+    }
+    30% {
+      opacity: 0.6;
+    }
+    36%,
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .code,
+    .line {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+</style>
+
+<script>
+  // static hosting serves this page for every unknown URL, so show which one was asked for
+  const path = decodeURIComponent(location.pathname + location.search).slice(0, 60);
+  document.querySelectorAll("[data-req]").forEach((el) => {
+    el.textContent = path;
+  });
+</script>
