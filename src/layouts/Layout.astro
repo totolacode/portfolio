@@ -17,7 +17,7 @@ interface Props {
 const {
   title,
   description = "札幌在住のフロントエンドエンジニア、吉田 貴雄(Takao Yoshida)のポートフォリオ。制作実績とこれまでの経歴を掲載しています。",
-  ogImage,
+  ogImage = "/og.png",
 } = Astro.props;
 
 // canonical / og:url / og:image need absolute URLs, so they are emitted only when `site` is set in astro.config
@@ -31,6 +31,8 @@ const ogImageUrl = Astro.site && ogImage ? new URL(ogImage, Astro.site).href : u
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="generator" content={Astro.generator} />
 
     <title>{title}</title>
@@ -43,7 +45,16 @@ const ogImageUrl = Astro.site && ogImage ? new URL(ogImage, Astro.site).href : u
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     {canonical && <meta property="og:url" content={canonical} />}
-    {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+    {
+      ogImageUrl && (
+        <>
+          <meta property="og:image" content={ogImageUrl} />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          <meta property="og:image:alt" content="Takao Yoshida | Frontend Engineer" />
+        </>
+      )
+    }
     <meta name="twitter:card" content={ogImageUrl ? "summary_large_image" : "summary"} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />

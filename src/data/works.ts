@@ -53,6 +53,19 @@ export const works: WorkItem[] = [
   {
     id: "w3",
     index: "03",
+    kind: "個人開発",
+    title: "このサイト(ポートフォリオ)",
+    tech: ["Astro", "TypeScript", "Vercel"],
+    comment: [
+      "自分のポートフォリオサイト。ターミナル風のUIと、休日に自分で撮影した写真の背景をコンセプトにした。",
+      "Astro + TypeScriptで、JavaScriptは演出が必要な部分だけに絞った静的サイトとして構築。フォントのローカル化、OGP・canonicalの設定、prefers-reduced-motionへの対応なども行った。",
+      "開発: Claude Codeを活用して実装。コンセプト、写真の選定、文章、公開範囲の判断は自分で行い、実装とレビューをClaude Codeと進めた。",
+    ].join("\n\n"),
+    image: "/works/portfolio-site.webp",
+  },
+  {
+    id: "w4",
+    index: "04",
     kind: "Freelance",
     title: "フリーランス案件",
     role: "コーディング / 運用保守",
