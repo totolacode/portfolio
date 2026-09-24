@@ -1,6 +1,6 @@
 ---
 interface Props {
-  /** "slideshow": Top's dual-image pan + torn noise edge. "static": About's single vignette-masked photo. */
+  /** "slideshow": Top's dual-image pan + torn noise edge. "static": About's single photo filling the space left of the panel. */
   mode: "slideshow" | "static";
 }
 
@@ -15,7 +15,7 @@ const { mode } = Astro.props;
         <img class="bg-photo-img" id="bgImgB" alt="" />
       </>
     ) : (
-      <img class="bg-photo-img" id="bgImg" alt="" />
+      <img class="bg-photo-img" id="bgImg" src="/photos/about/about.webp" alt="" />
     )
   }
 </div>
@@ -24,6 +24,7 @@ const { mode } = Astro.props;
   .bg-photo {
     position: absolute;
     inset: 0;
+    overflow: hidden;
     pointer-events: none;
     background: var(--bg);
   }
@@ -38,15 +39,14 @@ const { mode } = Astro.props;
     mask-repeat: no-repeat;
   }
 
-  /* About: bright center, short dark vignette at the rim -- the panel
-     itself is already a dark scrim, so no torn edge is needed here. */
+  /* About: fills the space to the left of the panel (see AboutPanel .file-panel
+     width / margin-right) and tucks ~80px behind it. It fades out towards the
+     panel, and the panel's own blur takes over from there. */
   .bg-photo.static {
-    -webkit-mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, #000 40%, transparent 100%);
-    mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, #000 40%, transparent 100%);
-    -webkit-mask-size: 100% 100%;
-    mask-size: 100% 100%;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
+    inset: 0 auto 0 0;
+    width: calc(100% - min(92vw, 640px) - clamp(20px, 5vw, 64px) + 80px);
+    -webkit-mask-image: linear-gradient(to right, #000 0%, #000 60%, transparent 100%);
+    mask-image: linear-gradient(to right, #000 0%, #000 60%, transparent 100%);
   }
 
   .bg-photo-img {
@@ -68,8 +68,8 @@ const { mode } = Astro.props;
     filter: saturate(0.55) brightness(0.6) contrast(1.05);
   }
   .static .bg-photo-img {
-    transform: scale(1.08);
-    filter: blur(2px) saturate(0.45) brightness(0.5) contrast(1.05);
+    object-position: 50% 55%;
+    filter: saturate(0.75) brightness(0.72) contrast(1.05);
   }
 
   .slideshow .bg-photo-img.pan-down {
@@ -117,7 +117,7 @@ const { mode } = Astro.props;
     }
   }
 
-  @media (max-width: 700px) {
+  @media (max-width: 860px) {
     .bg-photo.static {
       display: none;
     }
@@ -130,10 +130,22 @@ const { mode } = Astro.props;
 </style>
 
 <script>
-  function randomPhotoUrl(container: HTMLElement): string {
-    const w = Math.max(1, Math.round((container.clientWidth || window.innerWidth || 1200) * (window.devicePixelRatio || 1)));
-    const h = Math.max(1, Math.round((container.clientHeight || window.innerHeight || 900) * (window.devicePixelRatio || 1)));
-    return `https://picsum.photos/${w}/${h}?random=${Date.now()}${Math.random()}`;
+  const TOP_PHOTOS = Array.from({ length: 14 }, (_, i) => `/photos/top/${String(i + 1).padStart(2, "0")}.webp`);
+
+  // shuffled queue so every photo shows once per round, never the same one twice in a row
+  let queue: string[] = [];
+  let lastPhoto = "";
+  function nextPhotoUrl(): string {
+    if (queue.length === 0) {
+      queue = [...TOP_PHOTOS];
+      for (let i = queue.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [queue[i], queue[j]] = [queue[j]!, queue[i]!];
+      }
+      if (queue[queue.length - 1] === lastPhoto) queue.unshift(queue.pop()!);
+    }
+    lastPhoto = queue.pop()!;
+    return lastPhoto;
   }
 
   const bgPhotoEl = document.getElementById("bgPhoto");
@@ -171,7 +183,7 @@ const { mode } = Astro.props;
         img.onerror = () => {
           if (retriesLeft > 0) setTimeout(() => showNextPhoto(retriesLeft - 1), 1200);
         };
-        img.src = randomPhotoUrl(container);
+        img.src = nextPhotoUrl();
       }
 
       showNextPhoto();
@@ -180,15 +192,8 @@ const { mode } = Astro.props;
       const bgImgEl = document.getElementById("bgImg");
       if (bgImgEl instanceof HTMLImageElement) {
         const img: HTMLImageElement = bgImgEl;
-        function loadPhoto(attempt = 0): void {
-          img.onload = () => img.classList.add("active");
-          img.onerror = () => {
-            const delay = Math.min(1500 + attempt * 1000, 8000);
-            setTimeout(() => loadPhoto(attempt + 1), delay);
-          };
-          img.src = randomPhotoUrl(container);
-        }
-        loadPhoto();
+        if (img.complete && img.naturalWidth > 0) img.classList.add("active");
+        else img.onload = () => img.classList.add("active");
       }
     }
   }
