@@ -1,0 +1,15 @@
+/* Zen Kaku Gothic New: subset to the characters used on the site (see scripts/build-fonts.py) */
+@font-face {
+  font-family: "Zen Kaku Gothic New";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/zen-kaku-gothic-new-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Zen Kaku Gothic New";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/zen-kaku-gothic-new-700.woff2") format("woff2");
+}

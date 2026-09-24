@@ -15,7 +15,15 @@ const { mode } = Astro.props;
         <img class="bg-photo-img" id="bgImgB" alt="" />
       </>
     ) : (
-      <img class="bg-photo-img" id="bgImg" src="/photos/about/about.webp" alt="" />
+      <picture>
+        <source media="(min-width: 861px)" srcset="/photos/about/about.webp" />
+        <img
+          class="bg-photo-img"
+          id="bgImg"
+          alt=""
+          src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+        />
+      </picture>
     )
   }
 </div>
@@ -170,6 +178,7 @@ const { mode } = Astro.props;
       }
 
       function showNextPhoto(retriesLeft = 3): void {
+        if (getComputedStyle(container).display === "none") return;
         const nextIdx = 1 - activeIdx;
         const img = new Image();
         img.onload = () => {
@@ -192,8 +201,11 @@ const { mode } = Astro.props;
       const bgImgEl = document.getElementById("bgImg");
       if (bgImgEl instanceof HTMLImageElement) {
         const img: HTMLImageElement = bgImgEl;
-        if (img.complete && img.naturalWidth > 0) img.classList.add("active");
-        else img.onload = () => img.classList.add("active");
+        const reveal = () => {
+          if (img.currentSrc.endsWith("about.webp")) img.classList.add("active");
+        };
+        reveal();
+        img.addEventListener("load", reveal);
       }
     }
   }

@@ -1,27 +1,30 @@
 ---
 import "@/styles/reset.css";
 import "@/styles/tokens.css";
-import "@fontsource/zen-kaku-gothic-new/500.css";
-import "@fontsource/zen-kaku-gothic-new/700.css";
-import "@fontsource/jetbrains-mono/400.css";
-import "@fontsource/jetbrains-mono/500.css";
-import "@fontsource/jetbrains-mono/600.css";
+import "@/styles/transitions.css";
+import "@/styles/fonts.css";
+import "@fontsource/jetbrains-mono/latin-400.css";
+import "@fontsource/jetbrains-mono/latin-500.css";
+import "@fontsource/jetbrains-mono/latin-600.css";
 
 interface Props {
   title: string;
   description?: string;
   /** path under /public, e.g. "/og.png" */
   ogImage?: string;
+  /** e.g. the 404 page: keep it out of search results and skip canonical/og:url */
+  noindex?: boolean;
 }
 
 const {
   title,
   description = "札幌在住のフロントエンドエンジニア、吉田 貴雄(Takao Yoshida)のポートフォリオ。制作実績とこれまでの経歴を掲載しています。",
   ogImage = "/og.png",
+  noindex = false,
 } = Astro.props;
 
 // canonical / og:url / og:image need absolute URLs, so they are emitted only when `site` is set in astro.config
-const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+const canonical = Astro.site && !noindex ? new URL(Astro.url.pathname, Astro.site).href : undefined;
 const ogImageUrl = Astro.site && ogImage ? new URL(ogImage, Astro.site).href : undefined;
 ---
 
@@ -35,8 +38,12 @@ const ogImageUrl = Astro.site && ogImage ? new URL(ogImage, Astro.site).href : u
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="generator" content={Astro.generator} />
 
+    <link rel="preload" href="/fonts/zen-kaku-gothic-new-500.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/zen-kaku-gothic-new-700.woff2" as="font" type="font/woff2" crossorigin />
+
     <title>{title}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
     {canonical && <link rel="canonical" href={canonical} />}
 
     <meta property="og:type" content="website" />
