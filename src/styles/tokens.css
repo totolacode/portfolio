@@ -5,8 +5,8 @@
   --ink-dim: rgba(233, 236, 242, 0.6);
   --muted: #8890a0;
   --rule: rgba(233, 236, 242, 0.14);
-  --accent-solid: #5fc7ef;
-  --hl: #d8b463;
+  --accent: #d8b463;
+  --error: #e0836f;
   --panel-bg: rgba(255, 255, 255, 0.03);
 
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;

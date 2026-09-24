@@ -15,7 +15,29 @@ import TerminalPrompt from "@/components/TerminalPrompt.astro";
     <SiteMenu />
 
     <main class="content">
-      <h1 class="code" aria-label="404 Not Found">404</h1>
+      <h1 class="code" id="code404">
+        <svg id="codeSvg" class="code-svg" viewBox="0 0 290 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="404 Not Found">
+          <defs>
+            <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#fcd34d"></stop>
+              <stop offset="25%" stop-color="#fb7185"></stop>
+              <stop offset="50%" stop-color="#38bdf8"></stop>
+              <stop offset="75%" stop-color="#22d3ee"></stop>
+              <stop offset="100%" stop-color="#a78bfa"></stop>
+            </linearGradient>
+            <radialGradient id="revealGrad" gradientUnits="userSpaceOnUse" cx="150" cy="130" r="110">
+              <stop offset="0%" stop-color="#fff"></stop>
+              <stop offset="62%" stop-color="#fff"></stop>
+              <stop offset="100%" stop-color="#000"></stop>
+            </radialGradient>
+            <mask id="revealMask">
+              <rect id="maskRect" x="0" y="0" width="300" height="260" fill="url(#revealGrad)"></rect>
+            </mask>
+          </defs>
+          <text id="codeBase" class="txt-base" x="0" y="130">404</text>
+          <text id="codeFill" class="txt-fill" x="0" y="130" mask="url(#revealMask)">404</text>
+        </svg>
+      </h1>
 
       <div class="term">
         <p class="line" style="--i: 0">
@@ -65,14 +87,37 @@ import TerminalPrompt from "@/components/TerminalPrompt.astro";
 
   .code {
     margin: 0;
+    line-height: 0;
+    cursor: crosshair;
+    animation: flicker 3.2s steps(1, end) 0.4s 1 both;
+  }
+  .code-svg {
+    width: clamp(130px, 31vw, 285px);
+    height: auto;
+    overflow: visible;
+  }
+  .code-svg text {
     font-family: var(--display);
     font-weight: 700;
-    font-size: clamp(88px, 22vw, 200px);
-    line-height: 1;
-    letter-spacing: 0.02em;
-    color: transparent;
-    -webkit-text-stroke: 1.3px var(--ink);
-    animation: flicker 3.2s steps(1, end) 0.4s 1 both;
+    font-size: 220px;
+  }
+  .txt-base {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+  }
+  /* same trick as the top page: a gradient outline, revealed only around the pointer */
+  .txt-fill {
+    fill: none;
+    stroke: url(#accentGrad);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .code.hover .txt-fill {
+    opacity: 1;
   }
 
   .term {
@@ -95,7 +140,7 @@ import TerminalPrompt from "@/components/TerminalPrompt.astro";
     color: var(--ink);
   }
   .err {
-    color: #e0836f;
+    color: var(--error);
   }
   .note {
     font-family: var(--display);
@@ -110,7 +155,7 @@ import TerminalPrompt from "@/components/TerminalPrompt.astro";
     gap: 6px 22px;
   }
   .links a {
-    color: var(--accent-solid);
+    color: var(--accent);
     text-decoration: none;
     border-bottom: 1px dashed transparent;
   }
@@ -160,6 +205,9 @@ import TerminalPrompt from "@/components/TerminalPrompt.astro";
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .txt-fill {
+      transition: none !important;
+    }
     .code,
     .line {
       animation: none !important;
@@ -175,4 +223,70 @@ import TerminalPrompt from "@/components/TerminalPrompt.astro";
   document.querySelectorAll("[data-req]").forEach((el) => {
     el.textContent = path;
   });
+
+  // fit the SVG to the glyphs, and let the gradient outline follow the pointer
+  const code = document.getElementById("code404");
+  const svg = document.getElementById("codeSvg") as SVGSVGElement | null;
+  const base = document.getElementById("codeBase") as SVGTextElement | null;
+  const fill = document.getElementById("codeFill");
+  const revealGrad = document.getElementById("revealGrad");
+  const maskRect = document.getElementById("maskRect");
+
+  if (code && svg && base && fill && revealGrad && maskRect) {
+    function layoutSvg(): void {
+      // measure the digits themselves (not the font's line box) so the SVG hugs them
+      const ctx = document.createElement("canvas").getContext("2d");
+      let left = 0;
+      let right = 290;
+      let ascent = 160;
+      let descent = 0;
+      if (ctx) {
+        ctx.font = '700 220px "Zen Kaku Gothic New"';
+        const m = ctx.measureText("404");
+        left = m.actualBoundingBoxLeft;
+        right = m.actualBoundingBoxRight;
+        ascent = m.actualBoundingBoxAscent;
+        descent = m.actualBoundingBoxDescent;
+      }
+      const pad = 6;
+      const w = left + right + pad * 2;
+      const h = ascent + descent + pad * 2;
+
+      svg!.setAttribute("viewBox", `0 0 ${w} ${h}`);
+      [base, fill].forEach((t) => {
+        t?.setAttribute("x", String(pad + left));
+        t?.setAttribute("y", String(pad + ascent));
+      });
+      maskRect!.setAttribute("width", String(w));
+      maskRect!.setAttribute("height", String(h));
+      revealGrad!.setAttribute("cx", String(w / 2));
+      revealGrad!.setAttribute("cy", String(h / 2));
+      revealGrad!.setAttribute("r", String(Math.max(w, h) * 0.3));
+    }
+
+    function svgPoint(clientX: number, clientY: number): { x: number; y: number } {
+      const ctm = svg!.getScreenCTM();
+      if (!ctm) return { x: 0, y: 0 };
+      const pt = svg!.createSVGPoint();
+      pt.x = clientX;
+      pt.y = clientY;
+      const loc = pt.matrixTransform(ctm.inverse());
+      return { x: loc.x, y: loc.y };
+    }
+
+    code.addEventListener("pointermove", (e: PointerEvent) => {
+      const p = svgPoint(e.clientX, e.clientY);
+      revealGrad!.setAttribute("cx", String(p.x));
+      revealGrad!.setAttribute("cy", String(p.y));
+    });
+    code.addEventListener("pointerenter", () => code.classList.add("hover"));
+    code.addEventListener("pointerleave", () => code.classList.remove("hover"));
+
+    layoutSvg();
+    if (document.fonts?.load) {
+      Promise.all([document.fonts.load('700 100px "Zen Kaku Gothic New"'), document.fonts.ready])
+        .then(layoutSvg)
+        .catch(() => {});
+    }
+  }
 </script>

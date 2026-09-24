@@ -70,7 +70,7 @@ const gitLog = career.map((c) => `${fakeHash(c.company + c.period)} ${c.period} 
     outline: none;
     font: inherit;
     color: var(--ink);
-    caret-color: var(--accent-solid);
+    caret-color: var(--accent);
   }
   .cmd-input::placeholder {
     color: var(--muted);
@@ -108,7 +108,7 @@ const gitLog = career.map((c) => `${fakeHash(c.company + c.period)} ${c.period} 
   }
   .cmd-feedback {
     margin-left: 10px;
-    color: #e0836f;
+    color: var(--error);
     opacity: 0;
     white-space: nowrap;
     overflow: hidden;
