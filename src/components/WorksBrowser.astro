@@ -23,19 +23,41 @@ import { works } from "@/data/works";
     {
       works.map((work, i) => (
         <div class={`detail-panel ${i === 0 ? "current" : ""}`} data-work-panel={work.id}>
-          <div class="detail-shot">
-            {work.image ? <img src={work.image} alt={`${work.title}のスクリーンショット`} loading="lazy" /> : <span class="detail-shot-label">screenshot</span>}
-          </div>
+          {work.image && (
+            <div class="detail-shot">
+              <img src={work.image} alt={`${work.title}のスクリーンショット`} loading="lazy" />
+            </div>
+          )}
+          {work.kind && <span class="detail-kind">{work.kind}</span>}
           <h2 class="detail-title">{work.title}</h2>
 
-          <div class="detail-section">
-            <span class="detail-label">Tech Stack</span>
-            <div class="stack-tags">
-              {work.tech.map((t) => (
-                <span>{t}</span>
-              ))}
+          {(work.role || work.period) && (
+            <dl class="detail-meta">
+              {work.role && (
+                <div>
+                  <dt>Role</dt>
+                  <dd>{work.role}</dd>
+                </div>
+              )}
+              {work.period && (
+                <div>
+                  <dt>Period</dt>
+                  <dd>{work.period}</dd>
+                </div>
+              )}
+            </dl>
+          )}
+
+          {work.tech.length > 0 && (
+            <div class="detail-section">
+              <span class="detail-label">Tech Stack</span>
+              <div class="stack-tags">
+                {work.tech.map((t) => (
+                  <span>{t}</span>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           <div class="detail-section">
             <span class="detail-label">Comment</span>
@@ -45,6 +67,32 @@ import { works } from "@/data/works";
               ))
             }
           </div>
+
+          {work.projects && work.projects.length > 0 && (
+            <div class="detail-section">
+              <span class="detail-label">Projects</span>
+              <ul class="project-list">
+                {work.projects.map((p) => (
+                  <li>
+                    <span class="project-title">{p.title}</span>
+                    {p.meta && <span class="project-meta">{p.meta}</span>}
+                    <p class="project-desc">{p.description}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {work.others && work.others.length > 0 && (
+            <div class="detail-section">
+              <span class="detail-label">Others</span>
+              <ul class="others-list">
+                {work.others.map((o) => (
+                  <li>{o}</li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {work.url && (
             <a class="detail-link" href={work.url} target="_blank" rel="noopener noreferrer">
@@ -203,14 +251,39 @@ import { works } from "@/data/works";
     object-fit: cover;
     object-position: top;
   }
-  .detail-shot-label {
+  .detail-kind {
+    display: block;
+    margin-bottom: 8px;
     font-family: var(--mono);
     font-size: 11px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
+    color: var(--hl);
+  }
+
+  .detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 28px;
+    margin: 0 0 clamp(20px, 3vw, 26px);
+  }
+  .detail-meta div {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+  }
+  .detail-meta dt {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
     color: var(--muted);
-    border: 1px dashed var(--rule);
-    padding: 6px 14px;
+  }
+  .detail-meta dd {
+    margin: 0;
+    font-family: var(--display);
+    font-size: 13px;
+    color: var(--ink-dim);
   }
 
   .detail-title {
@@ -262,6 +335,53 @@ import { works } from "@/data/works";
   }
   .detail-comment:last-child {
     margin-bottom: 0;
+  }
+
+  .project-list,
+  .others-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .project-list li {
+    padding: 14px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .project-list li:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+  .project-title {
+    display: block;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .project-meta {
+    display: block;
+    margin-top: 2px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+  .project-desc {
+    margin: 8px 0 0;
+    font-family: var(--display);
+    font-size: 13px;
+    line-height: 1.85;
+    color: var(--ink-dim);
+  }
+  .others-list li {
+    font-family: var(--display);
+    font-size: 13px;
+    line-height: 1.95;
+    color: var(--ink-dim);
+  }
+  .others-list li::before {
+    content: "– ";
+    color: var(--muted);
   }
 
   .detail-link {

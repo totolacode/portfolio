@@ -9,24 +9,33 @@ export interface CareerEntry {
   company: string;
   description?: string;
   highlight?: string;
+  /** bullet list of what was handled, rendered under the description */
+  items?: string[];
   sub?: CareerSubEntry[];
 }
 
 export const origin = "稚内生まれ。進学を機に札幌へ移り、北海道工業大学を卒業。";
 
 export const summary =
-  "Webフロントエンドを中心に、WordPressやEC-CUBEを用いたサイト構築、Nuxt.js + LaravelでのWebアプリ開発に従事。社内勉強会の企画・運営や、チームリーダーとして新人育成にも携わり、技術・マネジメント両面でスキルを蓄積してきました。";
+  "Webフロントエンドを中心に、WordPress、EC-CUBE、Shopifyを用いたサイト・EC構築、Nuxt.js + LaravelでのWebアプリ開発に従事。社内勉強会の企画・運営や、チームリーダーとして新人育成にも携わり、技術・マネジメント両面でスキルを蓄積してきました。";
 export const summaryHighlight = "技術・マネジメント両面でスキルを蓄積";
 
 export const career: CareerEntry[] = [
   {
     period: "2021.08 - 現在",
     company: "株式会社monomode",
+    items: [
+      "Shopifyでの新規ECサイトの構築",
+      "EC-CUBE、makeshopなど別ECからShopifyへのリニューアル(要件整理、データ移行、技術面の打ち合わせ)",
+      "EC-CUBEのカスタマイズ(クライアントとディレクターの要望をもとにした仕様検討を含む)",
+      "WordPressのセキュリティ対応、外部APIを使ったログイン機能とマイページの実装",
+      "WordPressのカスタムブロックによるFSE(フルサイトエディティング)でのサイト構築(100ページを超える病院サイトのフルリニューアルで実装中)",
+    ],
     sub: [
       {
         period: "2023.04 -",
         description:
-          "業務効率化ツール「Huddler」の開発。Laravelでのデータ処理や、Stripeを用いたサブスクリプション課金機能を担当。",
+          "自社開発の業務効率化ツール「Huddler」の開発(Nuxt.js、Laravel、Firebase、AWS)。Laravelでのデータ処理や、Stripeを用いたサブスクリプション課金機能を担当。",
       },
       {
         period: "2022.09 -",

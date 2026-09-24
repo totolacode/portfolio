@@ -86,7 +86,6 @@ const { initialPath, showDelay = 500 } = Astro.props;
     home: "/",
     about: "/about",
     works: "/works",
-    contact: "/contact",
   };
 
   const promptLine = document.getElementById("promptLine");
@@ -139,7 +138,7 @@ const { initialPath, showDelay = 500 } = Astro.props;
     }
 
     if (cmd === "ls") {
-      showFeedback("top  about  works  contact");
+      showFeedback("top  about  works");
       return;
     }
     if (cmd === "clear") {

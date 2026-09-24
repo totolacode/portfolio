@@ -7,11 +7,22 @@ export interface WorkItem {
   comment: string;
   url?: string;
   image?: string;
+  /** e.g. "個人開発" / "Freelance" -- shown as a small label above the title */
+  kind?: string;
+  /** e.g. "約2ヶ月" */
+  period?: string;
+  /** e.g. "コーディング" */
+  role?: string;
+  /** sub-entries rendered as a list under the comment (used to group thin projects) */
+  projects?: { title: string; meta?: string; description: string }[];
+  /** one-line items listed under "Others" */
+  others?: string[];
 }
 
 export const works: WorkItem[] = [
   {
     id: "w1",
+    kind: "個人開発",
     index: "01",
     title: "つながり図",
     tech: ["JavaScript", "Canvas API"],
@@ -25,6 +36,7 @@ export const works: WorkItem[] = [
   },
   {
     id: "w2",
+    kind: "業務改善(自主開発)",
     index: "02",
     title: "Catalog Link Builder",
     tech: ["Python", "Streamlit", "pdfplumber", "pypdf"],
@@ -37,5 +49,44 @@ export const works: WorkItem[] = [
     ].join("\n\n"),
     url: "https://catalog-link-builder.streamlit.app/",
     image: "/works/catalog-link-builder.webp",
+  },
+  {
+    id: "w3",
+    index: "03",
+    kind: "Freelance",
+    title: "フリーランス案件",
+    role: "コーディング / 運用保守",
+    tech: ["Vue.js", "JavaScript", "SVG", "物理演算"],
+    comment: [
+      "フリーランスとして携わった案件のまとめ。公開を終了しているものや、手元に素材が残っていないものが多いため、個別のページではなく一覧で紹介する。",
+    ].join("\n\n"),
+    projects: [
+      {
+        title: "自治体イベント向けWebアプリゲーム",
+        meta: "コーディング / 約1ヶ月",
+        description: "物理演算を使い、同じ種類を繋げて消すツムツムのようなゲームを実装した。イベント終了後も継続して使いたいと、クライアントから連絡をもらった。",
+      },
+      {
+        title: "自動車パーツ企業 展示会サイト",
+        meta: "コーディング / 約2ヶ月",
+        description: "SVGを使ったアニメーションと、Vue.jsによる絞り込み検索を担当した。",
+      },
+      {
+        title: "マップ検索サイト",
+        meta: "コーディング・打ち合わせ参加 / 約2ヶ月",
+        description: "地図からそのエリアの施設を検索できるサイト。基本的なJavaScriptで実装し、客先での打ち合わせにも参加した。",
+      },
+      {
+        title: "イラストレーター展示イベント LP",
+        meta: "コーディング / 約2週間",
+        description: "イラストレーターたちによる展示イベントのランディングページ。",
+      },
+      {
+        title: "マーケティング会社 運用保守・リニューアル",
+        meta: "運用保守・リニューアル対応",
+        description: "自社ツールを販売しているマーケティング会社のサイトで、運用保守とリニューアルを担当した。",
+      },
+    ],
+    others: ["美容系メディアの更新作業", "サイトの新規制作(デザイン込みを含む)複数"],
   },
 ];

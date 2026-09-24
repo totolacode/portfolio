@@ -50,16 +50,15 @@ import { origin, summary, summaryHighlight, career } from "@/data/career";
         <p class="salutation">技術は広く、関わりは深く。</p>
 
         <p>
-          特定の技術に絞らず、幅広く触れてきました。深く実務で扱ってきたものもあれば、興味本位で少し触れた程度のものもありますが、
-          <span class="hl">新しい技術に触れること自体が好き</span>で、休みの日でも気づけば新しいツールを触っていることがあります。
+          仕事ではWordPress、EC-CUBE、Shopifyでのサイト・EC構築を中心に、Nuxt.js、Laravel、Firebase、AWSによる自社サービスの開発（Stripeによる課金機能など）にも携わってきました。
+          個人ではAstro、minista、Vite、React、Next.jsなどを触り、パワーCMSやmicroCMSにも触れています。
+          <span class="hl">新しい技術に触れること自体が好き</span>で、休みの日でも気づけば新しいツールを触っています。
         </p>
 
         <p>
-          一方で、関わる相手や案件には、数より深さを大事にしています。一つひとつの仕様やコードを丁寧に検討し、
+          一方で、関わる案件には数より深さを大事にしています。CMSの管理画面ひとつでも、クライアントが迷わず使えるにはどうするかを考えるのが好きです。「できない」で終わらせず、今できる範囲で形にする方法を探し、現場の困りごとから生まれたツールを実際の業務で使い続けてもらえることに、いちばんやりがいを感じます。
           <span class="hl">細部まで妥協せず向き合いたい</span>と考えています。
         </p>
-
-        <p class="closing">一緒に仕事をしてみたい、と思っていただけたら幸いです。お気軽にご連絡ください。</p>
       </div>
 
       <div class="file-body" data-panel="career">
@@ -77,6 +76,13 @@ import { origin, summary, summaryHighlight, career } from "@/data/career";
                 <p class="timeline-period">{entry.period}</p>
                 <p class="timeline-company">{entry.company}</p>
                 {entry.description && <p class="timeline-desc">{entry.description}</p>}
+                {entry.items && (
+                  <ul class="timeline-items">
+                    {entry.items.map((item) => (
+                      <li>{item}</li>
+                    ))}
+                  </ul>
+                )}
                 {entry.sub?.map((sub) => (
                   <div class="timeline-sub">
                     <p class="timeline-period">{sub.period}</p>
@@ -313,6 +319,21 @@ import { origin, summary, summaryHighlight, career } from "@/data/career";
     font-size: 13px;
     line-height: 1.85;
     color: var(--ink-dim);
+  }
+  .timeline-items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .timeline-items li {
+    font-family: var(--display);
+    font-size: 13px;
+    line-height: 1.85;
+    color: var(--ink-dim);
+  }
+  .timeline-items li::before {
+    content: "– ";
+    color: var(--muted);
   }
   .timeline-sub {
     margin-top: 10px;
